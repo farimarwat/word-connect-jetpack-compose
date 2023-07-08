@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">LexiLink</string>
+    <string name="title_activity_splash">SplashActivity</string>
+    <string name="studio_name">FunGiggle\nStudio</string>
+    <string name="title_activity_game_view">GameView</string>
+    <string name="level">Level %s</string>
+    <string name="title_activity_main">MainActivity</string>
+</resources>
