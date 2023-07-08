@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
@@ -33,11 +34,19 @@ import java.lang.Math.sin
 
 @Composable
 fun KeyPad(
+    shuffle:Boolean,
     radiusMain:Float,
     list:List<KeyPadButton>,
     onArgsObtained:(center:Offset,size:Size)->Unit = {_,_,->}
 ) {
     val paddingCanvas = 40.dp
+    val tweenspeed = 200
+    //rotation
+    val rotation by animateFloatAsState(
+        targetValue = if(shuffle) 360f else 0f,
+        animationSpec = tween(tweenspeed)
+    )
+    //
     Box(modifier = Modifier
         .padding(top = 50.dp)
         .fillMaxSize(),
@@ -61,64 +70,67 @@ fun KeyPad(
                 val button = list[index]
                 //End Preparing
 
-                // Draw button circle
-                val listColorsDefault = listOf(Color(0xFF904703),Color(0xFFFDCC9F))
-                val brushLinear = Brush.linearGradient(
-                    colors = listColorsDefault,
-                    start = Offset(
-                        button.center.x + (buttonRadius),
-                        button.center.y + (buttonRadius)
-                    ),
-                    end = Offset(
-                        button.center.x - (buttonRadius),
-                        button.center.y - (buttonRadius)
+                rotate(rotation){
+                    // Draw button circle
+                    val listColorsDefault = listOf(Color(0xFF904703),Color(0xFFFDCC9F))
+                    val brushLinear = Brush.linearGradient(
+                        colors = listColorsDefault,
+                        start = Offset(
+                            button.center.x + (buttonRadius),
+                            button.center.y + (buttonRadius)
+                        ),
+                        end = Offset(
+                            button.center.x - (buttonRadius),
+                            button.center.y - (buttonRadius)
+                        )
                     )
-                )
-                val brushBorderLinearTouched =  Brush.linearGradient(
-                    colors = listOf(Color(0xFFFFFFFF),Color(0xFF262525)),
-                    start = Offset(
-                        button.center.x + (buttonRadius),
-                        button.center.y + (buttonRadius)),
-                    end = Offset(button.center.x - (buttonRadius),
-                        button.center.y - (buttonRadius))
-                )
-                val brushBorderLinearDefault =  Brush.linearGradient(
-                    colors = listOf(Color(0xFF262525),Color(0xFFFFFFFF)),
-                    start = Offset(
-                        button.center.x + (buttonRadius),
-                        button.center.y + (buttonRadius)),
-                    end = Offset(button.center.x - (buttonRadius),
-                        button.center.y - (buttonRadius))
-                )
+                    val brushBorderLinearTouched =  Brush.linearGradient(
+                        colors = listOf(Color(0xFFFFFFFF),Color(0xFF262525)),
+                        start = Offset(
+                            button.center.x + (buttonRadius),
+                            button.center.y + (buttonRadius)),
+                        end = Offset(button.center.x - (buttonRadius),
+                            button.center.y - (buttonRadius))
+                    )
+                    val brushBorderLinearDefault =  Brush.linearGradient(
+                        colors = listOf(Color(0xFF262525),Color(0xFFFFFFFF)),
+                        start = Offset(
+                            button.center.x + (buttonRadius),
+                            button.center.y + (buttonRadius)),
+                        end = Offset(button.center.x - (buttonRadius),
+                            button.center.y - (buttonRadius))
+                    )
 
-                //Button Circle
-                drawCircle(
-                    brush =brushLinear,
-                    center = button.center,
-                    radius = buttonRadius
-                )
+                    //Button Circle
+                    drawCircle(
+                        brush =brushLinear,
+                        center = button.center,
+                        radius = buttonRadius
+                    )
 
-                drawCircle(
-                    brush = brushBorderLinearDefault,
-                    center = button.center,
-                    radius = buttonRadius+5,
-                    style = Stroke(width = 10f)
-                )
+                    drawCircle(
+                        brush = brushBorderLinearDefault,
+                        center = button.center,
+                        radius = buttonRadius+5,
+                        style = Stroke(width = 10f)
+                    )
 
-                // Draw text in the center of the button circle
-                drawIntoCanvas { canvas ->
-                    val text = button.label
-                    val textPaint = Paint().apply {
-                        color = Color.White.toArgb()
-                        textAlign = Paint.Align.CENTER
-                        textSize = 24.dp.toPx()
+                    // Draw text in the center of the button circle
+                    drawIntoCanvas { canvas ->
+                        val text = button.label
+                        val textPaint = Paint().apply {
+                            color = Color.White.toArgb()
+                            textAlign = Paint.Align.CENTER
+                            textSize = 24.dp.toPx()
+                        }
+                        val textBounds = Rect()
+                        textPaint.getTextBounds(text, 0, text.length, textBounds)
+                        val textX = button.center.x
+                        val textY = button.center.y + (textBounds.height()/2f)
+                        canvas.nativeCanvas.drawText(text, textX, textY, textPaint)
                     }
-                    val textBounds = Rect()
-                    textPaint.getTextBounds(text, 0, text.length, textBounds)
-                    val textX = button.center.x
-                    val textY = button.center.y + (textBounds.height()/2f)
-                    canvas.nativeCanvas.drawText(text, textX, textY, textPaint)
                 }
+                //End Draw Button
             }
         }
     }

@@ -152,7 +152,8 @@ fun GameScreen(){
                             .weight(1f)
                     ){
                         KeyPad(
-                            radiusMain,
+                            shuffle = shuffle,
+                            radiusMain = radiusMain,
                             list = list
                         ) {center ,size ->
                           centerMain = center
