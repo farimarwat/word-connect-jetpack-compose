@@ -12,3 +12,4 @@ val Pink40 = Color(0xFF7D5260)
 
 val LexiLink_Background = Color(0xFF2b2b2b)
 val LexiLink_YellowDark = Color(0xFFFFB904)
+val LexiLink_WordPreview = Color(0xFF000000)
