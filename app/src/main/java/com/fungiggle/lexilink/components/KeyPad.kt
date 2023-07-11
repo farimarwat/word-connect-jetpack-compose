@@ -1,4 +1,4 @@
-package com.fungiggle.lexilink.ui.components
+package com.fungiggle.lexilink.components
 
 import android.graphics.Paint
 import android.graphics.Rect
@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -25,6 +26,8 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.drawscope.rotate
@@ -33,6 +36,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.unit.dp
 import com.fungiggle.lexilink.models.KeyPadButton
+import com.fungiggle.lexilink.ui.theme.LexiLink_YellowDark
 import com.fungiggle.lexilink.utils.TAG
 import java.lang.Math.cos
 import java.lang.Math.sin
@@ -49,7 +53,7 @@ fun KeyPad(
     shuffle:Boolean,
     list:List<KeyPadButton>,
     onSetShuffle:()->Unit = {},
-    onSelected:(KeyPadButton)->Unit = {},
+    onSelected:(List<KeyPadButton>)->Unit = {},
     onCompleted:(List<KeyPadButton>)->Unit = {}
 ) {
     val listSelected = mutableListOf<KeyPadButton>()
@@ -61,11 +65,11 @@ fun KeyPad(
         mutableStateOf(Offset(0f,0f))
     }
     //path and templine
-    val path = remember {
-        Path()
+    val path by remember {
+       mutableStateOf( Path())
     }
-    val pathTmp = remember {
-        Path()
+    val pathTmp by remember {
+        mutableStateOf(Path())
     }
     //
 
@@ -138,6 +142,7 @@ fun KeyPad(
 
                 }
                 STATE_DOWN ->{
+                    listSelected.clear()
                     list.forEach { item ->
                         val istouched = isCircleTouched(
                             currentPos.x,
@@ -147,13 +152,16 @@ fun KeyPad(
                             buttonRadius
                         )
                         if (istouched) {
-                            onSelected(item)
                             listSelected.add(item)
                             path.moveTo(item.center.x, item.center.y)
+                            if(!shouldSelect){
+                                onSelected(listSelected)
+                            }
                             shouldSelect = true
                             return@forEach
                         }
                     }
+
                 }
                 STATE_MOVE ->{
                     if(shouldSelect){
@@ -172,11 +180,21 @@ fun KeyPad(
                                 buttonRadius
                             )
                             if (istouched) {
-                                if (!listSelected.contains(item)) {
-                                    onSelected(item)
-                                    listSelected.add(item)
-                                    path.lineTo(item.center.x, item.center.y)
+                                if(listSelected.size > 1 && isGoingBack(item,listSelected)){
+                                    listSelected.removeLast()
+                                    path.reset()
+                                    path.moveTo(listSelected.first().center.x, listSelected.first().center.y)
+                                    for (i in 1 until listSelected.size) {
+                                        val selected = listSelected[i]
+                                        path.lineTo(selected.center.x, selected.center.y)
+                                    }
+                                } else {
+                                    if (!listSelected.contains(item)) {
+                                        listSelected.add(item)
+                                        path.lineTo(item.center.x, item.center.y)
+                                    }
                                 }
+                                onSelected(listSelected)
                                return@forEach
                             }
                         }
@@ -277,15 +295,20 @@ fun KeyPad(
             }
 
             //Draw Path
-            drawPath(
-                color = Color.Red,
-                path = path,
-                style = Stroke(width = 5f)
+            val stroke = Stroke(
+                width = 20f,
+                cap = StrokeCap.Round,
+                join = StrokeJoin.Bevel,
             )
             drawPath(
-                color = Color.Red,
+                color = LexiLink_YellowDark,
+                path = path,
+                style = stroke
+            )
+            drawPath(
+                color = LexiLink_YellowDark,
                 path = pathTmp,
-                style = Stroke(width = 5f)
+                style = stroke
             )
 
         }
@@ -309,4 +332,14 @@ private fun isCircleTouched(
     val distanceX = touchX - centerX
     val distanceY = touchY - centerY
     return (distanceX * distanceX) + (distanceY * distanceY) <= r * r;
+}
+private fun isGoingBack(button: KeyPadButton, listselected:List<KeyPadButton>): Boolean {
+    var back = false
+    if(listselected.isNotEmpty()){
+        val last = listselected[listselected.size - 2]
+        if (button.id == last.id) {
+            back = true
+        }
+    }
+    return back
 }

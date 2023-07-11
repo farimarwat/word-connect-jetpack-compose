@@ -1,4 +1,4 @@
-package com.fungiggle.lexilink.ui.components
+package com.fungiggle.lexilink.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row

@@ -1,4 +1,4 @@
-package com.fungiggle.lexilink.ui.components
+package com.fungiggle.lexilink.components
 
 import android.view.MotionEvent
 import androidx.compose.foundation.Image

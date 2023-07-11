@@ -1,36 +1,62 @@
 package com.fungiggle.lexilink.ui.screens.gameview
 
+import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.fungiggle.lexilink.models.GameLetter
+import com.fungiggle.lexilink.models.GameLevel
+import com.fungiggle.lexilink.models.GameSolution
 import com.fungiggle.lexilink.models.KeyPadButton
+import com.fungiggle.lexilink.utils.TAG
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.util.UUID
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class GameScreenViewModel @Inject constructor(): ViewModel() {
-    val lettersList = mutableStateListOf<KeyPadButton>()
+class GameScreenViewModel @Inject constructor() : ViewModel() {
+    val listletters:MutableStateFlow<MutableList<KeyPadButton>> = MutableStateFlow(mutableListOf())
+    var listSolutions = mutableStateListOf<GameSolution>()
 
     //wordtopreview
-    private var _wordtopreview:MutableLiveData<String> = MutableLiveData("")
-    val wordtopreview:LiveData<String> = _wordtopreview
+    val wordtopreview = mutableStateOf("")
 
-    fun updateWordToPreview(label:String){
-        _wordtopreview.value += label
+
+    fun updateWordToPreview(word: String) {
+        wordtopreview.value = word
     }
-    fun clearWordToPreview(){
-        _wordtopreview.value = ""
-    }
-    init {
-        lettersList.add(KeyPadButton(UUID.randomUUID().toString(),"A", Offset(0f,0f),0f))
-        lettersList.add(KeyPadButton(UUID.randomUUID().toString(),"B", Offset(0f,0f),0f))
-        lettersList.add(KeyPadButton(UUID.randomUUID().toString(),"C", Offset(0f,0f),0f))
-        lettersList.add(KeyPadButton(UUID.randomUUID().toString(),"D", Offset(0f,0f),0f))
-    }
+
+    fun prepareLevel(letters: String, solutions: List<String>) =
+        viewModelScope.launch(Dispatchers.IO) {
+
+            //Preparing Keypad Selection
+            for (l in letters) {
+                listletters.value.add(
+                    KeyPadButton(label = l.toString())
+                )
+            }
+            //Preparing Solution View
+            val list = mutableListOf<GameSolution>()
+            for (word in solutions) {
+                val gameletters = mutableListOf<GameLetter>()
+                for (letter in word) {
+                    gameletters.add(
+                        GameLetter(label = letter.toString())
+                    )
+                }
+                list.add(
+                    GameSolution(gameletters)
+                )
+            }
+
+            val sorted = list.sortedBy { it.letters.size }
+            listSolutions.addAll(sorted)
+
+        }
 
 }

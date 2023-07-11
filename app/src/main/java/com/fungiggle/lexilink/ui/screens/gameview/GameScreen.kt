@@ -10,21 +10,25 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
@@ -32,9 +36,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.fungiggle.lexilink.R
-import com.fungiggle.lexilink.ui.components.BottomBar
-import com.fungiggle.lexilink.ui.components.KeyPad
-import com.fungiggle.lexilink.ui.components.TopBar
+import com.fungiggle.lexilink.components.BottomBar
+import com.fungiggle.lexilink.components.GameSolutionItem
+import com.fungiggle.lexilink.components.KeyPad
+import com.fungiggle.lexilink.components.SolutionPad
+import com.fungiggle.lexilink.components.TopBar
 import com.fungiggle.lexilink.ui.theme.LexiLink_WordPreview
 import com.fungiggle.lexilink.utils.TAG
 
@@ -57,11 +63,16 @@ fun MainViewPreviewSmall() {
 @Composable
 fun GameScreen() {
     val viewModel: GameScreenViewModel = hiltViewModel()
-    val list = viewModel.lettersList
+    val list = viewModel.listletters.collectAsState()
     var shuffle by remember {
         mutableStateOf(false)
     }
-    val wordToPreview by  viewModel.wordtopreview.observeAsState()
+
+    LaunchedEffect(Unit){
+        val letters = "CUP"
+        val solutions = listOf("CUP", "UP","HUB","HELP","MEATE","ICECREA")
+        viewModel.prepareLevel(letters, solutions)
+    }
     Box(
         modifier = Modifier
             .fillMaxSize(),
@@ -105,15 +116,23 @@ fun GameScreen() {
                     //Selection Pad
                     Box(
                         modifier = Modifier
-                            .weight(1f)
+                            .fillMaxSize()
+                            .weight(1f),
+                        contentAlignment = Alignment.Center
                     ) {
                         Image(
                             modifier = Modifier
-                                .fillMaxSize(),
+                                .fillMaxSize()
+                            ,
                             painter = painterResource(id = R.drawable.gameview_solutionpad),
                             contentDescription = "Solution Pad",
                             contentScale = ContentScale.Fit
                         )
+
+                        //Solution pad goes here
+                        val solutions = viewModel.listSolutions
+                        SolutionPad(solutions = solutions)
+
                     }
                 }
             }
@@ -144,22 +163,24 @@ fun GameScreen() {
                             .weight(1f)
                     ) {
 
-
                         KeyPad(
                             shuffle = shuffle,
-                            list = list,
+                            list = list.value,
                             onSetShuffle = {
                                 shuffle = false
                             },
-                            onSelected = { btn ->
-                                Log.e(TAG, "Label: ${btn.label}")
-                                viewModel.updateWordToPreview(btn.label)
+                            onSelected = { list ->
+                                var word = ""
+                                list.forEach{btn ->
+                                    word += btn.label
+                                }
+                                viewModel.updateWordToPreview(word)
                             },
                             onCompleted = { list ->
                                 val map = list.map {
                                     it.label
                                 }
-                                viewModel.clearWordToPreview()
+                                viewModel.wordtopreview.value = ""
                             }
                         )
                     }
@@ -184,7 +205,7 @@ fun GameScreen() {
                             },
                             onShuffleClicked = {
                                 shuffle = true
-                                list.shuffle()
+                                list.value.shuffle()
                             }
                         )
                     }
@@ -193,37 +214,37 @@ fun GameScreen() {
         }
 
         //Preview
-        wordToPreview?.let {
-            PreviewWord(
-                modifier = Modifier
-                    .align(Alignment.Center),
-                word =it
-            )
-        }
+        PreviewWord(
+            modifier = Modifier
+                .align(Alignment.Center),
+            viewmodel = viewModel
+        )
 
     }
 }
 
 @Composable
-fun PreviewWord(modifier: Modifier, word: String) {
-    val showScale by animateFloatAsState(
-        targetValue = if (word.isNotEmpty()) 1f else 0f,
-        animationSpec = tween(1000)
-    )
-    if (word.isNotEmpty()) {
-        Box(
-            modifier = Modifier
-                .clip(RoundedCornerShape(16.dp))
-                .background(LexiLink_WordPreview.copy(alpha = 0.5f))
-                .padding(start = 8.dp, end = 8.dp)
-                .scale(showScale)
-                .then(modifier),
-        ) {
-            Text(
-                text = word,
-                style = MaterialTheme.typography.labelLarge,
-                textAlign = TextAlign.Center
-            )
-        }
+fun PreviewWord(modifier: Modifier, viewmodel:GameScreenViewModel) {
+    val word = remember{
+        viewmodel.wordtopreview
     }
+    val showScale by animateFloatAsState(
+        targetValue = if (word.value.isNotEmpty()) 1f else 0f,
+        animationSpec = tween(200)
+    )
+    Box(
+        modifier = Modifier
+            .scale(showScale)
+            .clip(RoundedCornerShape(16.dp))
+            .background(LexiLink_WordPreview.copy(alpha = 0.5f))
+            .padding(start = 8.dp, end = 8.dp)
+            .then(modifier),
+    ) {
+        Text(
+            text = word.value,
+            style = MaterialTheme.typography.labelLarge,
+            textAlign = TextAlign.Center
+        )
+    }
+
 }
