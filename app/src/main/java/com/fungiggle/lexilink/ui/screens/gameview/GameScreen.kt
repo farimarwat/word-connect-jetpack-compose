@@ -70,7 +70,7 @@ fun GameScreen() {
 
     LaunchedEffect(Unit){
         val letters = "CUP"
-        val solutions = listOf("CUP", "UP","HUB","HELP","MEATE","ICECREA")
+        val solutions = listOf("CUP", "UP","FUN","PHONE","BONE","TONE","TELEMART","Turbat")
         viewModel.prepareLevel(letters, solutions)
     }
     Box(
