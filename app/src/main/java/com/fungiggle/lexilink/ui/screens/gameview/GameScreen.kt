@@ -21,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -67,10 +68,13 @@ fun GameScreen() {
     var shuffle by remember {
         mutableStateOf(false)
     }
+    var updatedSolutionpad by remember{
+        mutableStateOf(false)
+    }
 
-    LaunchedEffect(Unit){
+    LaunchedEffect(Unit) {
         val letters = "CUP"
-        val solutions = listOf("CUP", "UP","FUN","PHONE","BONE","TONE","TELEMART","Turbat")
+        val solutions = listOf("CUP", "UP", "FUN")
         viewModel.prepareLevel(letters, solutions)
     }
     Box(
@@ -113,7 +117,6 @@ fun GameScreen() {
                         )
                         TopBar()
                     }
-                    //Selection Pad
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
@@ -122,16 +125,14 @@ fun GameScreen() {
                     ) {
                         Image(
                             modifier = Modifier
-                                .fillMaxSize()
-                            ,
+                                .fillMaxSize(),
                             painter = painterResource(id = R.drawable.gameview_solutionpad),
                             contentDescription = "Solution Pad",
                             contentScale = ContentScale.Fit
                         )
 
                         //Solution pad goes here
-                        val solutions = viewModel.listSolutions
-                        SolutionPad(solutions = solutions)
+                        SolutionPad(updated = updatedSolutionpad, viewmodel = viewModel)
 
                     }
                 }
@@ -171,7 +172,7 @@ fun GameScreen() {
                             },
                             onSelected = { list ->
                                 var word = ""
-                                list.forEach{btn ->
+                                list.forEach { btn ->
                                     word += btn.label
                                 }
                                 viewModel.updateWordToPreview(word)
@@ -201,7 +202,10 @@ fun GameScreen() {
                         )
                         BottomBar(
                             onHintClicked = {
-
+                                val result = viewModel.showLetter()
+                                if(result){
+                                   updatedSolutionpad = !updatedSolutionpad
+                                }
                             },
                             onShuffleClicked = {
                                 shuffle = true
@@ -224,8 +228,8 @@ fun GameScreen() {
 }
 
 @Composable
-fun PreviewWord(modifier: Modifier, viewmodel:GameScreenViewModel) {
-    val word = remember{
+fun PreviewWord(modifier: Modifier, viewmodel: GameScreenViewModel) {
+    val word = remember {
         viewmodel.wordtopreview
     }
     val showScale by animateFloatAsState(

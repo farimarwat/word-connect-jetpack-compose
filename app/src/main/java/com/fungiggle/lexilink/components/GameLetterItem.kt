@@ -13,7 +13,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -22,18 +26,21 @@ import com.fungiggle.lexilink.models.GameLetter
 import java.util.UUID
 
 @Composable
-@Preview
-fun GameLetterItemPreview(){
-    val letter = GameLetter(
-        label = "A",
-        isvisible = false
-    )
-    GameLetterItem(letter = letter)
-}
-@Composable
-fun GameLetterItem(modifier: Modifier=Modifier,letter: GameLetter){
+fun GameLetterItem(
+    modifier: Modifier=Modifier,
+    letter: GameLetter,
+    onOffsetObtained:(offset:Offset) -> Unit = {}
+){
     Box(
-        modifier = modifier,
+        modifier = Modifier
+            .onGloballyPositioned {
+                val x = it.positionInRoot().x
+                val y = it.positionInRoot().y
+                onOffsetObtained(Offset(x,y))
+            }
+                .then(modifier)
+
+        ,
         contentAlignment = Alignment.Center
     ){
         Image(

@@ -1,5 +1,6 @@
 package com.fungiggle.lexilink.components
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,10 +18,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.fungiggle.lexilink.models.GameSolution
+import com.fungiggle.lexilink.ui.screens.gameview.GameScreenViewModel
+import com.fungiggle.lexilink.utils.TAG
 
 @Composable
-fun SolutionPad(solutions:List<GameSolution>){
-
+fun SolutionPad(
+    updated:Boolean,
+    viewmodel:GameScreenViewModel){
+    val solutions = viewmodel.listSolutions
     val itemsize = if(solutions.size <4){
         60.dp
     } else if(solutions.size == 4){
@@ -59,7 +64,9 @@ fun SolutionPad(solutions:List<GameSolution>){
                         horizontalAlignment = Alignment.CenterHorizontally
                     ){
                         items(sec){ sol ->
-                            GameSolutionItem(solution = sol, itemsize =itemsize )
+                            GameSolutionItem(solution = sol,
+                                itemsize =itemsize,
+                                viewmodel = viewmodel )
                         }
                     }
                 }
@@ -69,7 +76,10 @@ fun SolutionPad(solutions:List<GameSolution>){
                         horizontalAlignment = Alignment.CenterHorizontally
                     ){
                         items(sec){sol ->
-                            GameSolutionItem(solution = sol, itemsize =itemsize )
+                            GameSolutionItem(solution = sol,
+                                itemsize =itemsize,
+                                viewmodel = viewmodel
+                            )
                         }
                     }
                 }
@@ -79,7 +89,10 @@ fun SolutionPad(solutions:List<GameSolution>){
                 LazyColumn(
                 ){
                     items(sec){sol ->
-                        GameSolutionItem(solution = sol, itemsize =itemsize )
+                        GameSolutionItem(solution = sol,
+                            itemsize =itemsize,
+                            viewmodel = viewmodel
+                        )
                     }
                 }
             }

@@ -30,7 +30,6 @@ class GameScreenViewModel @Inject constructor() : ViewModel() {
     fun updateWordToPreview(word: String) {
         wordtopreview.value = word
     }
-
     fun prepareLevel(letters: String, solutions: List<String>) =
         viewModelScope.launch(Dispatchers.IO) {
 
@@ -58,5 +57,37 @@ class GameScreenViewModel @Inject constructor() : ViewModel() {
             listSolutions.addAll(sorted)
 
         }
+
+    fun showLetter():Boolean{
+        val incompletesolution = getInCompleteSolution() ?: return false
+        val invisibleletter = getInVisibleLetter(incompletesolution) ?: return false
+        listSolutions.forEachIndexed{sindex, sitem ->
+            sitem.letters.forEachIndexed{lindex,litem ->
+                if(litem == invisibleletter){
+                    listSolutions[sindex].letters[lindex] = litem.copy(isvisible = true)
+                    listSolutions[sindex] = listSolutions[sindex].copy(letters = listSolutions[sindex].letters)
+                    return true
+                }
+            }
+        }
+        return false
+    }
+    private fun getInCompleteSolution(): GameSolution?{
+        for(item in listSolutions){
+            if(!item.iscompleted){
+                return item
+            }
+        }
+        return null
+    }
+    private fun getInVisibleLetter(solution:GameSolution):GameLetter?{
+        for(item in solution.letters){
+            if(!item.isvisible){
+                return item
+            }
+        }
+        return null
+    }
+
 
 }
