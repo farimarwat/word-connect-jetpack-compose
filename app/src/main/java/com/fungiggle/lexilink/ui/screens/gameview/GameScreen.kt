@@ -203,6 +203,7 @@ fun GameScreen() {
                         BottomBar(
                             onHintClicked = {
                                 val result = viewModel.showLetter()
+                                Log.e(TAG,"Result: $result")
                                 if(result){
                                    updatedSolutionpad = !updatedSolutionpad
                                 }

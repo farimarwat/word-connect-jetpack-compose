@@ -59,11 +59,9 @@ class GameScreenViewModel @Inject constructor() : ViewModel() {
         }
 
     fun showLetter():Boolean{
-        val incompletesolution = getInCompleteSolution() ?: return false
-        val invisibleletter = getInVisibleLetter(incompletesolution) ?: return false
         listSolutions.forEachIndexed{sindex, sitem ->
             sitem.letters.forEachIndexed{lindex,litem ->
-                if(litem == invisibleletter){
+                if(!litem.isvisible){
                     listSolutions[sindex].letters[lindex] = litem.copy(isvisible = true)
                     listSolutions[sindex] = listSolutions[sindex].copy(letters = listSolutions[sindex].letters)
                     return true
