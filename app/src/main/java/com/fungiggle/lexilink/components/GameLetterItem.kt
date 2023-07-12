@@ -10,8 +10,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.ContentScale
@@ -27,39 +31,51 @@ import java.util.UUID
 
 @Composable
 fun GameLetterItem(
-    modifier: Modifier=Modifier,
+    modifier: Modifier = Modifier,
     letter: GameLetter,
-    onOffsetObtained:(offset:Offset) -> Unit = {}
-){
+    onOffsetObtained: (offset: Offset) -> Unit = {}
+) {
+    var shouldRotate by remember {
+        mutableStateOf(false)
+    }
+    val rotateSolution by animateFloatAsState(
+        targetValue = if(shouldRotate) 360f else 0f,
+        animationSpec = tween(200)
+    ){
+        shouldRotate = false
+    }
     Box(
         modifier = Modifier
             .onGloballyPositioned {
                 val x = it.positionInRoot().x
                 val y = it.positionInRoot().y
-                onOffsetObtained(Offset(x,y))
+                onOffsetObtained(Offset(x, y))
             }
-                .then(modifier)
-
-        ,
+            .then(modifier)
+            .rotate(rotateSolution),
         contentAlignment = Alignment.Center
-    ){
+    ) {
         Image(
             modifier = Modifier.fillMaxSize(),
             painter = painterResource(id = R.drawable.key_solution_default),
             contentDescription = "Background",
             contentScale = ContentScale.Fit
         )
+
         val scaleSolution by animateFloatAsState(
-            targetValue = if(letter.isvisible) 1f else 0f,
+            targetValue = if (letter.isvisible) 1f else 0f,
             animationSpec = tween(200)
-        )
+        ){
+            shouldRotate = true
+        }
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .scale(scaleSolution)
             ,
             contentAlignment = Alignment.Center
-        ){
+        ) {
             Image(
                 modifier = Modifier.fillMaxSize(),
                 painter = painterResource(id = R.drawable.key_solution_variant),

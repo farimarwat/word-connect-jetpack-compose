@@ -58,17 +58,17 @@ class GameScreenViewModel @Inject constructor() : ViewModel() {
 
         }
 
-    fun showLetter():Boolean{
+    fun showLetter():GameLetter?{
         listSolutions.forEachIndexed{sindex, sitem ->
             sitem.letters.forEachIndexed{lindex,litem ->
                 if(!litem.isvisible){
                     listSolutions[sindex].letters[lindex] = litem.copy(isvisible = true)
                     listSolutions[sindex] = listSolutions[sindex].copy(letters = listSolutions[sindex].letters)
-                    return true
+                    return litem
                 }
             }
         }
-        return false
+        return null
     }
     private fun getInCompleteSolution(): GameSolution?{
         for(item in listSolutions){

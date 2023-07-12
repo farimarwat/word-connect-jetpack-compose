@@ -140,6 +140,9 @@ dependencies {
 
     //security component
     implementation "androidx.security:security-crypto:1.0.0"
+
+    def lottieVersion = "6.0.1"
+    implementation "com.airbnb.android:lottie-compose:$lottieVersion"
 }
 
 kapt {
