@@ -19,12 +19,14 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -37,7 +39,11 @@ import com.fungiggle.lexilink.components.KeyPad
 import com.fungiggle.lexilink.components.SolutionPad
 import com.fungiggle.lexilink.components.TopBar
 import com.fungiggle.lexilink.ui.theme.LexiLink_WordPreview
+import com.fungiggle.lexilink.utils.LEVEL_CLEAR_DELAY
 import com.fungiggle.lexilink.utils.TAG
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 @Preview(
@@ -57,19 +63,19 @@ fun MainViewPreviewSmall() {
 
 @Composable
 fun GameScreen() {
+    val scope = rememberCoroutineScope()
     val viewModel: GameScreenViewModel = hiltViewModel()
     val list = viewModel.listletters.collectAsState()
     var shuffle by remember {
         mutableStateOf(false)
     }
+    val mLevel by viewModel.level
 
     var levelCompleted by remember {
         mutableStateOf(false)
     }
     LaunchedEffect(Unit) {
-        val letters = "CUP"
-        val solutions = listOf("CUP", "UP")
-        viewModel.prepareLevel(letters, solutions)
+        viewModel.prepareLevel()
     }
     Box(
         modifier = Modifier
@@ -109,7 +115,7 @@ fun GameScreen() {
                             contentDescription = "Solution Pad",
                             contentScale = ContentScale.FillBounds
                         )
-                        TopBar()
+                        TopBar(mLevel)
                     }
                     Box(
                         modifier = Modifier
@@ -175,8 +181,11 @@ fun GameScreen() {
                             onCompleted = { list ->
                                 val solution = viewModel.isExists(list)
                                 if(solution != null){
-                                    levelCompleted = viewModel.setSolutionComplete(solution)
-
+                                    scope.launch(Dispatchers.IO){
+                                        val completed = viewModel.setSolutionComplete(solution)
+                                        delay(LEVEL_CLEAR_DELAY)
+                                        levelCompleted = completed
+                                    }
                                 }
                                 viewModel.wordtopreview.value = ""
                             }
@@ -201,8 +210,13 @@ fun GameScreen() {
                         BottomBar(
                             onHintClicked = {
                                 val result = viewModel.showLetter()
-                                viewModel.listSolutions.forEach{
-                                    Log.e(TAG,"Solution: $it")
+                                if(result == null){
+                                    scope.launch(Dispatchers.IO) {
+                                        viewModel.setCompleteAll()
+                                        val completed = viewModel.isLevelCompleted()
+                                            delay(LEVEL_CLEAR_DELAY)
+                                        levelCompleted = completed
+                                    }
                                 }
                             },
                             onShuffleClicked = {
@@ -224,10 +238,9 @@ fun GameScreen() {
         if(levelCompleted){
             DialogLevelComplete{
                 levelCompleted = false
-                val letters = "ATB"
-                val solutions = listOf("AT", "BAT","TAB")
-                viewModel.prepareLevel(letters, solutions)
+                viewModel.prepareLevel()
             }
+
         }
 
     }

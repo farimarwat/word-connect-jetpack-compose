@@ -51,10 +51,14 @@ fun SolutionPad(solutions:List<GameSolution>){
             else -> SECTION_3
         }
     }
-    val section1 = groupedSolutions.getOrElse(SECTION_1,{null})
-    val section2 = groupedSolutions.getOrElse(SECTION_2,{null})
+    var section1 = groupedSolutions.getOrElse(SECTION_1,{null})
+    var section2 = groupedSolutions.getOrElse(SECTION_2,{null})
     val section3 = groupedSolutions.getOrElse(SECTION_3,{null})
 
+    if (section1 != null && section2 != null && (section1.size + section2.size) <= 4) {
+        section1 = section1 + section2
+        section2 = null
+    }
     Box(
         modifier = Modifier
             .padding(start=16.dp, end = 16.dp)
@@ -64,7 +68,6 @@ fun SolutionPad(solutions:List<GameSolution>){
         Log.e(TAG,"SolutionPad Drawn")
         Column() {
             Row(
-
             ){
                 val colModifier = Modifier.padding(start=4.dp,end=4.dp)
                 section1?.let { sec ->

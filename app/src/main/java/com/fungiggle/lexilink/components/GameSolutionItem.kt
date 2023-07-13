@@ -44,8 +44,7 @@ fun GameSolutionItem(
           .size(itemsize)
       LazyRow{
           itemsIndexed(solution.letters){index, letter ->
-              val isvisible = solution.iscompleted
-              GameLetterItem(modifier = modifier,letter = letter.copy(isvisible = isvisible))
+              GameLetterItem(modifier = modifier,letter = letter)
           }
       }
   }
