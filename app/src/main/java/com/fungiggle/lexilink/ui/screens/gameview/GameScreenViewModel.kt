@@ -1,19 +1,15 @@
 package com.fungiggle.lexilink.ui.screens.gameview
 
-import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.MutableLiveData
+import androidx.compose.runtime.toMutableStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fungiggle.lexilink.models.GameLetter
-import com.fungiggle.lexilink.models.GameLevel
 import com.fungiggle.lexilink.models.GameSolution
 import com.fungiggle.lexilink.models.KeyPadButton
-import com.fungiggle.lexilink.utils.TAG
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -32,7 +28,8 @@ class GameScreenViewModel @Inject constructor() : ViewModel() {
     }
     fun prepareLevel(letters: String, solutions: List<String>) =
         viewModelScope.launch(Dispatchers.IO) {
-
+            listletters.value.clear()
+            listSolutions.clear()
             //Preparing Keypad Selection
             for (l in letters) {
                 listletters.value.add(
@@ -49,7 +46,7 @@ class GameScreenViewModel @Inject constructor() : ViewModel() {
                     )
                 }
                 list.add(
-                    GameSolution(gameletters)
+                    GameSolution(gameletters.toMutableStateList())
                 )
             }
 
@@ -59,33 +56,43 @@ class GameScreenViewModel @Inject constructor() : ViewModel() {
         }
 
     fun showLetter():GameLetter?{
+        val gameLetter:GameLetter? = null
         listSolutions.forEachIndexed{sindex, sitem ->
             sitem.letters.forEachIndexed{lindex,litem ->
                 if(!litem.isvisible){
                     listSolutions[sindex].letters[lindex] = litem.copy(isvisible = true)
-                    listSolutions[sindex] = listSolutions[sindex].copy(letters = listSolutions[sindex].letters)
                     return litem
                 }
             }
         }
-        return null
+        return gameLetter
     }
-    private fun getInCompleteSolution(): GameSolution?{
-        for(item in listSolutions){
-            if(!item.iscompleted){
-                return item
+
+    fun setSolutionComplete(solution:GameSolution):Boolean{
+        val index = listSolutions.indexOf(solution)
+        listSolutions[index] = solution.copy(iscompleted = true)
+        return isLevelCompleted()
+    }
+    fun isExists(list:List<KeyPadButton>):GameSolution?{
+        var word = ""
+        list.forEach {kpb ->
+            word += kpb.label.uppercase()
+        }
+        listSolutions.forEach { solution ->
+            if(solution.isEqual(word)){
+                return solution
             }
         }
-        return null
-    }
-    private fun getInVisibleLetter(solution:GameSolution):GameLetter?{
-        for(item in solution.letters){
-            if(!item.isvisible){
-                return item
-            }
-        }
+
         return null
     }
 
-
+    fun isLevelCompleted():Boolean{
+        listSolutions.forEach { solution ->
+            if(!solution .iscompleted){
+                return false
+            }
+        }
+        return true
+    }
 }

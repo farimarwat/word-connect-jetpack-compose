@@ -32,10 +32,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.fungiggle.lexilink.R
 import com.fungiggle.lexilink.components.BottomBar
+import com.fungiggle.lexilink.components.DialogLevelComplete
 import com.fungiggle.lexilink.components.KeyPad
 import com.fungiggle.lexilink.components.SolutionPad
 import com.fungiggle.lexilink.components.TopBar
-import com.fungiggle.lexilink.models.GameLetter
 import com.fungiggle.lexilink.ui.theme.LexiLink_WordPreview
 import com.fungiggle.lexilink.utils.TAG
 
@@ -62,13 +62,13 @@ fun GameScreen() {
     var shuffle by remember {
         mutableStateOf(false)
     }
-    var letterUpdated by remember {
-        mutableStateOf<GameLetter?>(null)
-    }
 
+    var levelCompleted by remember {
+        mutableStateOf(false)
+    }
     LaunchedEffect(Unit) {
         val letters = "CUP"
-        val solutions = listOf("CUP", "UP", "FUN")
+        val solutions = listOf("CUP", "UP")
         viewModel.prepareLevel(letters, solutions)
     }
     Box(
@@ -126,7 +126,8 @@ fun GameScreen() {
                         )
 
                         //Solution pad goes here
-                        SolutionPad(letter = letterUpdated, viewmodel = viewModel)
+                        val solutionsList = viewModel.listSolutions
+                        SolutionPad(solutionsList)
 
                     }
                 }
@@ -172,8 +173,10 @@ fun GameScreen() {
                                 viewModel.updateWordToPreview(word)
                             },
                             onCompleted = { list ->
-                                val map = list.map {
-                                    it.label
+                                val solution = viewModel.isExists(list)
+                                if(solution != null){
+                                    levelCompleted = viewModel.setSolutionComplete(solution)
+
                                 }
                                 viewModel.wordtopreview.value = ""
                             }
@@ -198,9 +201,8 @@ fun GameScreen() {
                         BottomBar(
                             onHintClicked = {
                                 val result = viewModel.showLetter()
-                                if (result != null) {
-                                    Log.e(TAG, "Letter: $result")
-                                    letterUpdated = result
+                                viewModel.listSolutions.forEach{
+                                    Log.e(TAG,"Solution: $it")
                                 }
                             },
                             onShuffleClicked = {
@@ -219,6 +221,14 @@ fun GameScreen() {
                 .align(Alignment.Center),
             viewmodel = viewModel
         )
+        if(levelCompleted){
+            DialogLevelComplete{
+                levelCompleted = false
+                val letters = "ATB"
+                val solutions = listOf("AT", "BAT","TAB")
+                viewModel.prepareLevel(letters, solutions)
+            }
+        }
 
     }
 }

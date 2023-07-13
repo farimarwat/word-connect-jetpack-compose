@@ -1,5 +1,6 @@
 package com.fungiggle.lexilink.components
 
+import android.util.Log
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
@@ -25,15 +26,19 @@ import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.fungiggle.lexilink.R
 import com.fungiggle.lexilink.models.GameLetter
+import com.fungiggle.lexilink.utils.TAG
 import java.util.UUID
 
 @Composable
 fun GameLetterItem(
     modifier: Modifier = Modifier,
-    letter: GameLetter,
-    onOffsetObtained: (offset: Offset) -> Unit = {}
+    letter: GameLetter
 ) {
     var shouldRotate by remember {
         mutableStateOf(false)
@@ -42,17 +47,14 @@ fun GameLetterItem(
         targetValue = if(shouldRotate) 360f else 0f,
         animationSpec = tween(200)
     ){
-        shouldRotate = false
+        //shouldRotate = false
     }
+
     Box(
         modifier = Modifier
-            .onGloballyPositioned {
-                val x = it.positionInRoot().x
-                val y = it.positionInRoot().y
-                onOffsetObtained(Offset(x, y))
-            }
+            .rotate(rotateSolution)
             .then(modifier)
-            .rotate(rotateSolution),
+            ,
         contentAlignment = Alignment.Center
     ) {
         Image(
@@ -61,7 +63,6 @@ fun GameLetterItem(
             contentDescription = "Background",
             contentScale = ContentScale.Fit
         )
-
         val scaleSolution by animateFloatAsState(
             targetValue = if (letter.isvisible) 1f else 0f,
             animationSpec = tween(200)

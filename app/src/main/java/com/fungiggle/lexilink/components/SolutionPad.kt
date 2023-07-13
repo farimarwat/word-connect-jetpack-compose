@@ -1,5 +1,6 @@
 package com.fungiggle.lexilink.components
 
+import android.util.Log
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
@@ -26,14 +27,12 @@ import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.fungiggle.lexilink.R
 import com.fungiggle.lexilink.models.GameLetter
+import com.fungiggle.lexilink.models.GameSolution
 import com.fungiggle.lexilink.ui.screens.gameview.GameScreenViewModel
+import com.fungiggle.lexilink.utils.TAG
 
 @Composable
-fun SolutionPad(
-    letter:GameLetter?,
-    viewmodel:GameScreenViewModel){
-
-    val solutions = viewmodel.listSolutions
+fun SolutionPad(solutions:List<GameSolution>){
     val itemsize = if(solutions.size <4){
         60.dp
     } else if(solutions.size == 4){
@@ -62,6 +61,7 @@ fun SolutionPad(
         ,
     ){
 
+        Log.e(TAG,"SolutionPad Drawn")
         Column() {
             Row(
 
@@ -74,8 +74,7 @@ fun SolutionPad(
                     ){
                         items(sec){ sol ->
                             GameSolutionItem(solution = sol,
-                                itemsize =itemsize,
-                                viewmodel = viewmodel )
+                                itemsize =itemsize)
                         }
                     }
                 }
@@ -86,8 +85,7 @@ fun SolutionPad(
                     ){
                         items(sec){sol ->
                             GameSolutionItem(solution = sol,
-                                itemsize =itemsize,
-                                viewmodel = viewmodel
+                                itemsize =itemsize
                             )
                         }
                     }
@@ -101,7 +99,6 @@ fun SolutionPad(
                     items(sec){sol ->
                         GameSolutionItem(solution = sol,
                             itemsize =itemsize,
-                            viewmodel = viewmodel
                         )
                     }
                 }
@@ -109,18 +106,4 @@ fun SolutionPad(
         }
 
     }
-   /* letter?.offset?.let { offset ->
-        showStars = true
-        LottieAnimation(
-            composition = composition,
-            progress = {
-                progress
-            },
-            modifier = Modifier
-                .alpha(alphaStars)
-                .offset {
-                    IntOffset(offset.x.toInt(),offset.y.toInt())
-                }
-        )
-    }*/
 }

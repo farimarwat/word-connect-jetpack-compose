@@ -32,8 +32,7 @@ import com.fungiggle.lexilink.utils.TAG
 @Composable
 fun GameSolutionItem(
     solution: GameSolution,
-    itemsize:Dp,
-    viewmodel:GameScreenViewModel
+    itemsize:Dp
 ){
   Box(
       modifier = Modifier
@@ -45,10 +44,8 @@ fun GameSolutionItem(
           .size(itemsize)
       LazyRow{
           itemsIndexed(solution.letters){index, letter ->
-              GameLetterItem(modifier = modifier,letter = letter){ offset->
-                  val indexSolution = viewmodel.listSolutions.indexOf(solution)
-                  viewmodel.listSolutions[indexSolution].letters[index] = letter.copy(offset=offset)
-              }
+              val isvisible = solution.iscompleted
+              GameLetterItem(modifier = modifier,letter = letter.copy(isvisible = isvisible))
           }
       }
   }
