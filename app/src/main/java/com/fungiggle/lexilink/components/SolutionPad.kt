@@ -33,10 +33,10 @@ import com.fungiggle.lexilink.utils.TAG
 
 @Composable
 fun SolutionPad(solutions:List<GameSolution>){
-    val itemsize = if(solutions.size <4){
-        60.dp
+    var itemsize = if(solutions.size <4){
+        50.dp
     } else if(solutions.size == 4){
-        48.dp
+        40.dp
     } else {
         32.dp
     }
@@ -54,11 +54,14 @@ fun SolutionPad(solutions:List<GameSolution>){
     var section1 = groupedSolutions.getOrElse(SECTION_1,{null})
     var section2 = groupedSolutions.getOrElse(SECTION_2,{null})
     val section3 = groupedSolutions.getOrElse(SECTION_3,{null})
-
+    if((section2 != null) || (section3 != null)){
+        itemsize = 40.dp
+    }
     if (section1 != null && section2 != null && (section1.size + section2.size) <= 4) {
         section1 = section1 + section2
         section2 = null
     }
+
     Box(
         modifier = Modifier
             .padding(start=16.dp, end = 16.dp)

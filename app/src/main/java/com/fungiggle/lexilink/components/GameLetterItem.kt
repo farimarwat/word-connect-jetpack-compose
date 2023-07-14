@@ -40,19 +40,9 @@ fun GameLetterItem(
     modifier: Modifier = Modifier,
     letter: GameLetter
 ) {
-    var shouldRotate by remember {
-        mutableStateOf(false)
-    }
-    val rotateSolution by animateFloatAsState(
-        targetValue = if(shouldRotate) 360f else 0f,
-        animationSpec = tween(200)
-    ){
-        //shouldRotate = false
-    }
-
+    Log.e(TAG,"Letter: $letter")
     Box(
         modifier = Modifier
-            .rotate(rotateSolution)
             .then(modifier)
             ,
         contentAlignment = Alignment.Center
@@ -66,9 +56,7 @@ fun GameLetterItem(
         val scaleSolution by animateFloatAsState(
             targetValue = if (letter.isvisible) 1f else 0f,
             animationSpec = tween(200)
-        ){
-            shouldRotate = true
-        }
+        )
 
         Box(
             modifier = Modifier

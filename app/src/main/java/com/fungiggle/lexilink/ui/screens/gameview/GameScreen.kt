@@ -1,7 +1,16 @@
 package com.fungiggle.lexilink.ui.screens.gameview
 
-import android.util.Log
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.TweenSpec
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.repeatable
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -15,7 +24,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -24,9 +32,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -40,7 +49,6 @@ import com.fungiggle.lexilink.components.SolutionPad
 import com.fungiggle.lexilink.components.TopBar
 import com.fungiggle.lexilink.ui.theme.LexiLink_WordPreview
 import com.fungiggle.lexilink.utils.LEVEL_CLEAR_DELAY
-import com.fungiggle.lexilink.utils.TAG
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -65,11 +73,12 @@ fun MainViewPreviewSmall() {
 fun GameScreen() {
     val scope = rememberCoroutineScope()
     val viewModel: GameScreenViewModel = hiltViewModel()
-    val list = viewModel.listletters.collectAsState()
+    val mListLetters = viewModel.mListletters
     var shuffle by remember {
         mutableStateOf(false)
     }
     val mLevel by viewModel.level
+    val dataprepared by viewModel.dataPrepared
 
     var levelCompleted by remember {
         mutableStateOf(false)
@@ -132,8 +141,10 @@ fun GameScreen() {
                         )
 
                         //Solution pad goes here
-                        val solutionsList = viewModel.listSolutions
-                        SolutionPad(solutionsList)
+                        if (dataprepared) {
+                            val solutionsList = viewModel.mListSolutions
+                            SolutionPad(solutionsList)
+                        }
 
                     }
                 }
@@ -165,31 +176,36 @@ fun GameScreen() {
                             .weight(1f)
                     ) {
 
-                        KeyPad(
-                            shuffle = shuffle,
-                            list = list.value,
-                            onSetShuffle = {
-                                shuffle = false
-                            },
-                            onSelected = { list ->
-                                var word = ""
-                                list.forEach { btn ->
-                                    word += btn.label
-                                }
-                                viewModel.updateWordToPreview(word)
-                            },
-                            onCompleted = { list ->
-                                val solution = viewModel.isExists(list)
-                                if(solution != null){
-                                    scope.launch(Dispatchers.IO){
-                                        val completed = viewModel.setSolutionComplete(solution)
-                                        delay(LEVEL_CLEAR_DELAY)
-                                        levelCompleted = completed
+                        if (dataprepared) {
+                            KeyPad(
+                                shuffle = shuffle,
+                                list = mListLetters,
+                                onSetShuffle = {
+                                    shuffle = false
+                                },
+                                onSelected = { list ->
+                                    var word = ""
+                                    list.forEach { btn ->
+                                        word += btn.label
                                     }
+                                    viewModel.updateWordToPreview(word)
+                                },
+                                onCompleted = { list ->
+                                    val solution = viewModel.isExists(list)
+                                    if (solution != null) {
+                                        scope.launch(Dispatchers.IO) {
+                                            val completed = viewModel.setSolutionComplete(solution)
+                                            delay(LEVEL_CLEAR_DELAY)
+                                            levelCompleted = completed
+                                        }
+
+                                    } else {
+
+                                    }
+                                    viewModel.wordtopreview.value = ""
                                 }
-                                viewModel.wordtopreview.value = ""
-                            }
-                        )
+                            )
+                        }
                     }
 
 
@@ -209,19 +225,19 @@ fun GameScreen() {
                         )
                         BottomBar(
                             onHintClicked = {
-                                val result = viewModel.showLetter()
-                                if(result == null){
-                                    scope.launch(Dispatchers.IO) {
+                                scope.launch {
+                                    viewModel.showLetter()
+                                    val isshowedall = viewModel.isAllLettersShowed()
+                                    if (isshowedall) {
                                         viewModel.setCompleteAll()
-                                        val completed = viewModel.isLevelCompleted()
-                                            delay(LEVEL_CLEAR_DELAY)
-                                        levelCompleted = completed
+                                        delay(LEVEL_CLEAR_DELAY)
+                                        levelCompleted = true
                                     }
                                 }
                             },
                             onShuffleClicked = {
                                 shuffle = true
-                                list.value.shuffle()
+                                mListLetters.shuffle()
                             }
                         )
                     }
@@ -229,14 +245,19 @@ fun GameScreen() {
             }
         }
 
+
         //Preview
+
+
         PreviewWord(
             modifier = Modifier
-                .align(Alignment.Center),
-            viewmodel = viewModel
+                .align(Alignment.Center)
+            ,
+            viewmodel = viewModel,
+
         )
-        if(levelCompleted){
-            DialogLevelComplete{
+        if (levelCompleted) {
+            DialogLevelComplete {
                 levelCompleted = false
                 viewModel.prepareLevel()
             }
@@ -247,7 +268,10 @@ fun GameScreen() {
 }
 
 @Composable
-fun PreviewWord(modifier: Modifier, viewmodel: GameScreenViewModel) {
+fun PreviewWord(modifier: Modifier,
+                viewmodel: GameScreenViewModel,
+) {
+
     val word = remember {
         viewmodel.wordtopreview
     }

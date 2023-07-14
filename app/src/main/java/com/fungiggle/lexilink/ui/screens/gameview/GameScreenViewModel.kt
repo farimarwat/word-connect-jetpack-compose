@@ -1,24 +1,20 @@
 package com.fungiggle.lexilink.ui.screens.gameview
 
-import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.toMutableStateList
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fungiggle.lexilink.data.answer.AnswerRepo
-import com.fungiggle.lexilink.data.word.Word
 import com.fungiggle.lexilink.data.word.WordRepo
 import com.fungiggle.lexilink.data.word.WordWithAnswers
 import com.fungiggle.lexilink.models.GameLetter
 import com.fungiggle.lexilink.models.GameSolution
 import com.fungiggle.lexilink.models.KeyPadButton
-import com.fungiggle.lexilink.utils.TAG
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -26,10 +22,11 @@ class GameScreenViewModel @Inject constructor(
     val wordRepo: WordRepo,
     val answerRepo: AnswerRepo
 ) : ViewModel() {
-    val listletters:MutableStateFlow<MutableList<KeyPadButton>> = MutableStateFlow(mutableListOf())
-    var listSolutions = mutableStateListOf<GameSolution>()
+    var mListletters = mutableStateListOf<KeyPadButton>()
+    var mListSolutions = mutableStateListOf<GameSolution>()
     var mWordWithAnswers:WordWithAnswers? = null
     var level = mutableStateOf("")
+    var dataPrepared = mutableStateOf(false)
 
     //wordtopreview
     val wordtopreview = mutableStateOf("")
@@ -40,24 +37,35 @@ class GameScreenViewModel @Inject constructor(
     }
     fun prepareLevel() =
         viewModelScope.launch(Dispatchers.IO) {
-            mWordWithAnswers = wordRepo.getWordWithAnswers(false)
-            if(mWordWithAnswers != null){
-                val dbword = mWordWithAnswers!!.word
+            dataPrepared.value = false
+            mListletters.clear()
+            mListSolutions.clear()
+            //getting data from database
+            val job = viewModelScope.launch{
+                mWordWithAnswers = wordRepo.getWordWithAnswers(false)
+            }
+            job.join()
+
+
+            mWordWithAnswers?.let { wordwithanswers ->
+                val dbword = wordwithanswers.word
                 level.value = dbword.serial.toString()
-                val answers = answerRepo.list(dbword.id)
+                val answers = wordwithanswers.answers
                 val solutions = mutableListOf<String>()
                 answers.forEach{item ->
                     solutions.add(item.answer)
                 }
                 val letters = dbword.word
-                listletters.value.clear()
-                listSolutions.clear()
+
                 //Preparing Keypad Selection
+                val listletters = mutableListOf<KeyPadButton>()
                 for (l in letters) {
-                    listletters.value.add(
+                    listletters.add(
                         KeyPadButton(label = l.toString())
                     )
                 }
+                mListletters = listletters.toMutableStateList()
+
                 //Preparing Solution View
                 val list = mutableListOf<GameSolution>()
                 for (word in solutions) {
@@ -73,40 +81,50 @@ class GameScreenViewModel @Inject constructor(
                 }
 
                 val sorted = list.sortedBy { it.letters.size }
-                listSolutions.addAll(sorted)
+                mListSolutions = sorted.toMutableStateList()
             }
 
+            dataPrepared.value = true
         }
 
     fun showLetter():GameLetter?{
         val gameLetter:GameLetter? = null
-        listSolutions.forEachIndexed{sindex, sitem ->
+        mListSolutions.forEachIndexed{ sindex, sitem ->
             sitem.letters.forEachIndexed{lindex,litem ->
                 if(!litem.isvisible){
-                    listSolutions[sindex].letters[lindex] = litem.copy(isvisible = true)
+                    mListSolutions[sindex].letters[lindex] = litem.copy(isvisible = true)
                     return litem
                 }
             }
         }
         return gameLetter
     }
-
+    suspend fun isAllLettersShowed():Boolean = withContext(Dispatchers.IO){
+        mListSolutions.forEachIndexed{ sindex, sitem ->
+            sitem.letters.forEachIndexed{lindex,litem ->
+                if(!litem.isvisible){
+                    return@withContext false
+                }
+            }
+        }
+        return@withContext true
+    }
 
     fun setSolutionComplete(solution: GameSolution): Boolean {
-        val index = listSolutions.indexOf(solution)
+        val index = mListSolutions.indexOf(solution)
         val letters = solution.letters.toMutableList() // Create a copy of the letters list
         letters.forEachIndexed { i, l ->
             letters[i] = l.copy(isvisible = true)
         }
-        listSolutions[index] = solution.copy(letters = letters.toMutableStateList(), iscompleted = true)
+        mListSolutions[index] = solution.copy(letters = letters.toMutableStateList(), iscompleted = true)
         return isLevelCompleted()
     }
     fun setCompleteAll():Boolean{
-        val solutions = listSolutions.toMutableList()
+        val solutions = mListSolutions.toMutableList()
         solutions.forEachIndexed{ index, item ->
             solutions[index] = item.copy(iscompleted = true)
         }
-        listSolutions = solutions.toMutableStateList()
+        mListSolutions = solutions.toMutableStateList()
         return isLevelCompleted()
     }
 
@@ -115,7 +133,7 @@ class GameScreenViewModel @Inject constructor(
         list.forEach {kpb ->
             word += kpb.label.uppercase()
         }
-        listSolutions.forEach { solution ->
+        mListSolutions.forEach { solution ->
             if(solution.isEqual(word)){
                 return solution
             }
@@ -125,7 +143,7 @@ class GameScreenViewModel @Inject constructor(
     }
 
     fun isLevelCompleted():Boolean{
-        listSolutions.forEach { solution ->
+        mListSolutions.forEach { solution ->
             if(!solution .iscompleted){
                 return false
             }

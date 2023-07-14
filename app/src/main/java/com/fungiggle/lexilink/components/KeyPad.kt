@@ -181,6 +181,7 @@ fun KeyPad(
                             )
                             if (istouched) {
                                 if(listSelected.size > 1 && isGoingBack(item,listSelected)){
+                                    Log.e(TAG,"Going Back")
                                     listSelected.removeLast()
                                     path.reset()
                                     path.moveTo(listSelected.first().center.x, listSelected.first().center.y)
