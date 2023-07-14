@@ -19,6 +19,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.airbnb.lottie.compose.LottieAnimation
@@ -33,12 +34,24 @@ import com.fungiggle.lexilink.utils.TAG
 
 @Composable
 fun SolutionPad(solutions:List<GameSolution>){
-    var itemsize = if(solutions.size <4){
-        50.dp
-    } else if(solutions.size == 4){
-        40.dp
-    } else {
-        32.dp
+    val height = LocalConfiguration.current.screenHeightDp
+    var itemSize = 48.dp
+    if(height <=600){ //small screens
+        itemSize = if(solutions.size <4){
+            50.dp
+        } else if(solutions.size == 4){
+            40.dp
+        } else {
+            32.dp
+        }
+    } else { // large screen
+        itemSize = if(solutions.size <4){
+            50.dp
+        } else if(solutions.size == 4){
+            48.dp
+        } else {
+            32.dp
+        }
     }
     //Grouping Solutions
     val SECTION_1 = "section1"
@@ -55,7 +68,11 @@ fun SolutionPad(solutions:List<GameSolution>){
     var section2 = groupedSolutions.getOrElse(SECTION_2,{null})
     val section3 = groupedSolutions.getOrElse(SECTION_3,{null})
     if((section2 != null) || (section3 != null)){
-        itemsize = 40.dp
+       if(height <= 600){
+           itemSize = 40.dp
+       } else {
+           itemSize = 48.dp
+       }
     }
     if (section1 != null && section2 != null && (section1.size + section2.size) <= 4) {
         section1 = section1 + section2
@@ -80,7 +97,7 @@ fun SolutionPad(solutions:List<GameSolution>){
                     ){
                         items(sec){ sol ->
                             GameSolutionItem(solution = sol,
-                                itemsize =itemsize)
+                                itemsize =itemSize)
                         }
                     }
                 }
@@ -91,7 +108,7 @@ fun SolutionPad(solutions:List<GameSolution>){
                     ){
                         items(sec){sol ->
                             GameSolutionItem(solution = sol,
-                                itemsize =itemsize
+                                itemsize =itemSize
                             )
                         }
                     }
@@ -104,7 +121,7 @@ fun SolutionPad(solutions:List<GameSolution>){
                 ){
                     items(sec){sol ->
                         GameSolutionItem(solution = sol,
-                            itemsize =itemsize,
+                            itemsize =itemSize,
                         )
                     }
                 }
