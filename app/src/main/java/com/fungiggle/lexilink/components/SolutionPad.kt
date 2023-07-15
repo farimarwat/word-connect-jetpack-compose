@@ -35,24 +35,20 @@ import com.fungiggle.lexilink.utils.TAG
 @Composable
 fun SolutionPad(solutions:List<GameSolution>){
     val height = LocalConfiguration.current.screenHeightDp
-    var itemSize = 48.dp
-    if(height <=600){ //small screens
-        itemSize = if(solutions.size <4){
-            50.dp
-        } else if(solutions.size == 4){
-            40.dp
-        } else {
-            32.dp
-        }
-    } else { // large screen
-        itemSize = if(solutions.size <4){
-            50.dp
-        } else if(solutions.size == 4){
-            48.dp
-        } else {
-            32.dp
-        }
+    var small = 0.dp
+    var medium = 0.dp
+    var large = 0.dp
+    if(height <= 600){
+        small = 28.dp
+        medium = 32.dp
+        large = 48.dp
+    } else {
+        small = 32.dp
+        medium = 40.dp
+        large = 50.dp
     }
+    var itemSize = 0.dp
+    var total = 0
     //Grouping Solutions
     val SECTION_1 = "section1"
     val SECTION_2 = "section2"
@@ -60,7 +56,7 @@ fun SolutionPad(solutions:List<GameSolution>){
     val groupedSolutions = solutions.groupBy { solution ->
         when(solution.letters.size){
             in Int.MIN_VALUE..3 -> SECTION_1
-            in 4..5 ->SECTION_2
+            in 4..4 ->SECTION_2
             else -> SECTION_3
         }
     }
@@ -68,15 +64,28 @@ fun SolutionPad(solutions:List<GameSolution>){
     var section2 = groupedSolutions.getOrElse(SECTION_2,{null})
     val section3 = groupedSolutions.getOrElse(SECTION_3,{null})
     if((section2 != null) || (section3 != null)){
-       if(height <= 600){
-           itemSize = 40.dp
-       } else {
-           itemSize = 48.dp
-       }
+       itemSize = small
     }
     if (section1 != null && section2 != null && (section1.size + section2.size) <= 4) {
         section1 = section1 + section2
         section2 = null
+    }
+    section1?.let {
+        total += it.size
+    }
+    section2?.let {
+        total += it.size
+    }
+    section3?.let {
+        total += it.size
+    }
+
+    itemSize = if(total <=4){
+        large
+    } else if( total < 8) {
+        medium
+    } else {
+        small
     }
 
     Box(
@@ -127,6 +136,5 @@ fun SolutionPad(solutions:List<GameSolution>){
                 }
             }
         }
-
     }
 }

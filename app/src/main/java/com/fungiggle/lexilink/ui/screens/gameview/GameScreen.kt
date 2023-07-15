@@ -1,5 +1,6 @@
 package com.fungiggle.lexilink.ui.screens.gameview
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
@@ -34,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -42,9 +44,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.fungiggle.lexilink.R
+import com.fungiggle.lexilink.components.AnimatedOverlay
 import com.fungiggle.lexilink.components.BottomBar
 import com.fungiggle.lexilink.components.DialogLevelComplete
 import com.fungiggle.lexilink.components.KeyPad
+import com.fungiggle.lexilink.components.PreviewWord
 import com.fungiggle.lexilink.components.SolutionPad
 import com.fungiggle.lexilink.components.TopBar
 import com.fungiggle.lexilink.ui.theme.LexiLink_WordPreview
@@ -246,15 +250,14 @@ fun GameScreen() {
         }
 
 
+        //Screen Overlay
+        AnimatedOverlay(animate = !viewModel.dataPrepared.value)
         //Preview
-
-
         PreviewWord(
             modifier = Modifier
                 .align(Alignment.Center)
             ,
             viewmodel = viewModel,
-
         )
         if (levelCompleted) {
             DialogLevelComplete {
@@ -267,31 +270,3 @@ fun GameScreen() {
     }
 }
 
-@Composable
-fun PreviewWord(modifier: Modifier,
-                viewmodel: GameScreenViewModel,
-) {
-
-    val word = remember {
-        viewmodel.wordtopreview
-    }
-    val showScale by animateFloatAsState(
-        targetValue = if (word.value.isNotEmpty()) 1f else 0f,
-        animationSpec = tween(200)
-    )
-    Box(
-        modifier = Modifier
-            .scale(showScale)
-            .clip(RoundedCornerShape(16.dp))
-            .background(LexiLink_WordPreview.copy(alpha = 0.5f))
-            .padding(start = 8.dp, end = 8.dp)
-            .then(modifier),
-    ) {
-        Text(
-            text = word.value,
-            style = MaterialTheme.typography.labelLarge,
-            textAlign = TextAlign.Center
-        )
-    }
-
-}

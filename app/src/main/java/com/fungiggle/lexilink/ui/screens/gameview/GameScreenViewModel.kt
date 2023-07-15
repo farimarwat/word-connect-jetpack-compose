@@ -13,6 +13,7 @@ import com.fungiggle.lexilink.models.GameSolution
 import com.fungiggle.lexilink.models.KeyPadButton
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -84,6 +85,7 @@ class GameScreenViewModel @Inject constructor(
                 mListSolutions = sorted.toMutableStateList()
             }
 
+            delay(1000)
             dataPrepared.value = true
         }
 
