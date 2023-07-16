@@ -47,7 +47,9 @@ CoroutineScope(Dispatchers.IO).launch{
         }
 ```
 ## Prepare Level
-Code below in **<a href="https://github.com/farimarwat/word-connect-jetpack-compose/blob/master/app/src/main/java/com/fungiggle/lexilink/ui/screens/gameview/GameScreen.kt">GameScreen.kt</a>** is responsible to initialy prepare the level
+Code below in **<a href="https://github.com/farimarwat/word-connect-jetpack-compose/blob/master/app/src/main/java/com/fungiggle/lexilink/ui/screens/gameview/GameScreen.kt">GameScreen.kt</a>** is responsible to initialy prepare the level/
+
+<a href="https://github.com/farimarwat/word-connect-jetpack-compose/blob/master/app/src/main/java/com/fungiggle/lexilink/ui/screens/gameview/GameScreenViewModel.kt">GameScreenViewModel.kt</a> has all related methods
 ```
 LaunchedEffect(Unit) {
         viewModel.prepareLevel()
