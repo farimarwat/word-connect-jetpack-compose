@@ -87,3 +87,10 @@ val adbuttonmodifier = Modifier
                 //Show your add here
             }
 ```
+**Note:** I will gradually update the documentation.
+
+## Support Me
+If you want to donate then you are welcome to buy me a cup of tea via **PATREON** because this encourages me to give you more free stuff
+and continue to  maintain this library
+
+<a href="https://patreon.com/farimarwat">Buy Now!</a>
