@@ -23,6 +23,7 @@ Used Technologies:
 6. MVVM
 7. Navigation Component
 8. Single Activity and Multiple Screens
+9. Only 200 levels available
 
 ## How To Use
 1. Just Clone the repo and done!.
