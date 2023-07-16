@@ -34,7 +34,7 @@ actual game. It is quite simple and easy to understand.
 
 Every thing resides in ui>screens>gameview package. This package containes two files, one is viewmodel and second is gamveview composable.
 
-<a href="https://github.com/farimarwat/word-connect-jetpack-compose/blob/master/app/src/main/java/com/fungiggle/lexilink/ui/screens/gameview/GameScreen.kt">GameView</a> is divided into two parts, one is top and second is bottom. The top section contains the solution pad which letters will be showed invisible/visible. Second and the bottom part contains keypad which can be used to select letters.
+<a href="https://github.com/farimarwat/word-connect-jetpack-compose/blob/master/app/src/main/java/com/fungiggle/lexilink/ui/screens/gameview/GameScreen.kt">GameView</a> is divided into two parts, one is top and second is bottom. The top section contains the solution pad where letters will be showed invisible/visible. Second and the bottom part contains keypad which can be used to select letters.
 
 ## Getting Started
 
