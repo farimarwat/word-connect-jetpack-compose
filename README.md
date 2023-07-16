@@ -70,3 +70,17 @@ BottomBar(
   onShuffleClicked = {}
 )
 ```
+## Ad button
+Add button is only visible if gems are not enough to consume. The consume amount can be changed in 
+<a href="https://github.com/farimarwat/word-connect-jetpack-compose/blob/master/app/src/main/java/com/fungiggle/lexilink/utils/GemShopManager.kt">GemShopManager.kt</a>
+```
+val adbuttonmodifier = Modifier
+                .size(80.dp)
+                .align(Alignment.CenterEnd)
+            ButtonWatchAd(
+                modifier = adbuttonmodifier
+            ){
+
+                //Show your add here
+            }
+```
