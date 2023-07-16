@@ -23,11 +23,50 @@ Used Technologies:
 
 ## Game Screen
 There are two screen composables (screens) Main Screen which have play/settings buttons and gameview which have the
-actual game. It is quite simple and easy to understand
+actual game. It is quite simple and easy to understand.
+
 Every thing resides in ui>screens>gameview package. This package containes two files, one is viewmodel and second is gamveview composable.
-GameView contains is divided into two parts, one is top and second is bottom. The top section contains the solution pad which letters will be showed invisible/visible. Second and the bottom part contains keypad which can be used to select letters.
 
-## GemShopManager
-This singleton class contains every thing to manage gems.
+GameView is divided into two parts, one is top and second is bottom. The top section contains the solution pad which letters will be showed invisible/visible. Second and the bottom part contains keypad which can be used to select letters.
 
+## Getting Started
 
+## Splash Screen
+Gems are initialized on this screen
+```
+CoroutineScope(Dispatchers.IO).launch{
+
+            //Check if app is installed first time. if
+            //First time then initial free gems are provided
+            GemShopManager.initializeSharedPrefs(mContext)
+            if(GemShopManager.isFirstInstallation()){
+                GemShopManager.initializeGemsTotal()
+                GemShopManager.setFirstInstallationStatus(false)
+            }
+        }
+```
+## Prepare Level
+Code below in **GameScreen.kt** is responsible to initialy prepare the level
+```
+LaunchedEffect(Unit) {
+        viewModel.prepareLevel()
+    }
+```
+## Top Bar
+Top bar contains two sections. One to display level and second is to show available gems.
+It takes two params, level and gems which is already provided by viewmodel.
+```
+fun TopBar(level:String, gems:Int)
+```
+## Bottom Bar
+It has two callbacks, one to trigger hint and second to shuffle the letters.
+
+On hint, gems are first checked, if it has enough gems then gems are consumed and hint is provided.
+
+**Note:** GemShopManager.kt which is responsible to manage gems, resides in utils package
+```
+BottomBar(
+  onHintClicked = {},
+  onShuffleClicked = {}
+)
+```
