@@ -1,7 +1,8 @@
 # Word Puzzle/Connect Game
 A word puzzle game based on android jetpack compose.
 
-##Video Demo:
+## Video Demo (Click on image):
+
 <a href="https://youtube.com/shorts/4mfJrG7XfLs?feature=share">
             <img src="https://github.com/farimarwat/word-connect-jetpack-compose/blob/master/preview.png" width="30%" height="30%"/>
 </a>
