@@ -21,18 +21,19 @@ Used Technologies:
 ## How To Use
 1. Just Clone the repo and done!.
 
-## Game Screen
-There are two screen composables (screens) Main Screen which have play/settings buttons and gameview which have the
+## Screens
+There are two screen composables (screens) <a href="https://github.com/farimarwat/word-connect-jetpack-compose/blob/master/app/src/main/java/com/fungiggle/lexilink/ui/screens/main/MainScreen.kt">Main Screen</a> which have play/settings buttons and gameview which have the
 actual game. It is quite simple and easy to understand.
 
 Every thing resides in ui>screens>gameview package. This package containes two files, one is viewmodel and second is gamveview composable.
 
-GameView is divided into two parts, one is top and second is bottom. The top section contains the solution pad which letters will be showed invisible/visible. Second and the bottom part contains keypad which can be used to select letters.
+<a href="https://github.com/farimarwat/word-connect-jetpack-compose/blob/master/app/src/main/java/com/fungiggle/lexilink/ui/screens/gameview/GameScreen.kt">GameView</a> is divided into two parts, one is top and second is bottom. The top section contains the solution pad which letters will be showed invisible/visible. Second and the bottom part contains keypad which can be used to select letters.
 
 ## Getting Started
 
 ## Splash Screen
-Gems are initialized on this screen
+Gems are initialized on this screen: 
+<a href="https://github.com/farimarwat/word-connect-jetpack-compose/blob/master/app/src/main/java/com/fungiggle/lexilink/ui/screens/SplashActivity.kt">SplashActivity.kt</a>
 ```
 CoroutineScope(Dispatchers.IO).launch{
 
@@ -46,7 +47,7 @@ CoroutineScope(Dispatchers.IO).launch{
         }
 ```
 ## Prepare Level
-Code below in **GameScreen.kt** is responsible to initialy prepare the level
+Code below in **<a href="https://github.com/farimarwat/word-connect-jetpack-compose/blob/master/app/src/main/java/com/fungiggle/lexilink/ui/screens/gameview/GameScreen.kt">GameScreen.kt</a>** is responsible to initialy prepare the level
 ```
 LaunchedEffect(Unit) {
         viewModel.prepareLevel()
