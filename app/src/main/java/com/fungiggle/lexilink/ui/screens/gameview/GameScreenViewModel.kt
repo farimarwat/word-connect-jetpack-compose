@@ -5,6 +5,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.toMutableStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.farimarwat.picloo.utils.GEMS_TO_CONSUME
+import com.farimarwat.picloo.utils.GemShopManager
 import com.fungiggle.lexilink.data.answer.AnswerRepo
 import com.fungiggle.lexilink.data.word.WordRepo
 import com.fungiggle.lexilink.data.word.WordWithAnswers
@@ -47,7 +49,6 @@ class GameScreenViewModel @Inject constructor(
             }
             job.join()
 
-
             mWordWithAnswers?.let { wordwithanswers ->
                 val dbword = wordwithanswers.word
                 level.value = dbword.serial.toString()
@@ -89,29 +90,31 @@ class GameScreenViewModel @Inject constructor(
             dataPrepared.value = true
         }
 
-    fun showLetter():GameLetter?{
-        val gameLetter:GameLetter? = null
+
+    //This will set the letter to visible
+    //And return the letter's solution
+     fun showLetter():GameSolution?{
         mListSolutions.forEachIndexed{ sindex, sitem ->
             sitem.letters.forEachIndexed{lindex,litem ->
                 if(!litem.isvisible){
                     mListSolutions[sindex].letters[lindex] = litem.copy(isvisible = true)
-                    return litem
+                    return sitem
                 }
             }
         }
-        return gameLetter
+        return null
     }
-    suspend fun isAllLettersShowed():Boolean = withContext(Dispatchers.IO){
-        mListSolutions.forEachIndexed{ sindex, sitem ->
-            sitem.letters.forEachIndexed{lindex,litem ->
-                if(!litem.isvisible){
-                    return@withContext false
-                }
+     fun isAllLettersShowed(solution:GameSolution):Boolean{
+        solution.letters.forEach{ item ->
+            if(!item.isvisible){
+                return false
             }
         }
-        return@withContext true
+        return true
     }
 
+    //This will set the solution complete and return if
+    //All solutions are completed
     fun setSolutionComplete(solution: GameSolution): Boolean {
         val index = mListSolutions.indexOf(solution)
         val letters = solution.letters.toMutableList() // Create a copy of the letters list
@@ -119,14 +122,6 @@ class GameScreenViewModel @Inject constructor(
             letters[i] = l.copy(isvisible = true)
         }
         mListSolutions[index] = solution.copy(letters = letters.toMutableStateList(), iscompleted = true)
-        return isLevelCompleted()
-    }
-    fun setCompleteAll():Boolean{
-        val solutions = mListSolutions.toMutableList()
-        solutions.forEachIndexed{ index, item ->
-            solutions[index] = item.copy(iscompleted = true)
-        }
-        mListSolutions = solutions.toMutableStateList()
         return isLevelCompleted()
     }
 
@@ -140,7 +135,6 @@ class GameScreenViewModel @Inject constructor(
                 return solution
             }
         }
-
         return null
     }
 
@@ -157,12 +151,14 @@ class GameScreenViewModel @Inject constructor(
         }
         return true
     }
-    private fun extractLevel(level:String):String{
-        var l = level
-        if(level.contains("_")){
-            val parts = level.split("_")
-            l = parts[1]
+
+    //Gem
+    suspend fun consumeGems():Boolean = withContext(Dispatchers.IO){
+        val gemsTotal = GemShopManager.getGemsTotal()
+        if(gemsTotal >= GEMS_TO_CONSUME){
+            GemShopManager.consumeGems(GEMS_TO_CONSUME)
+            return@withContext true
         }
-        return l
+        return@withContext false
     }
 }

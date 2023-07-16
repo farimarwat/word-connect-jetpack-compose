@@ -2,41 +2,46 @@ package com.fungiggle.lexilink.utils
 
 import android.content.Context
 import android.media.AudioAttributes
-import android.media.AudioManager
-import android.media.SoundPool
-import android.os.Build
-import androidx.annotation.RawRes
+import android.media.MediaPlayer
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.launch
 
 object SoundPlayer {
-    private var soundPool: SoundPool? = null
+    private var mediaPlayer: MediaPlayer? = null
 
-    suspend fun init(context: Context) {
-        withContext(Dispatchers.IO) {
-            if (soundPool == null) {
-                soundPool =
-                    val audioAttributes = AudioAttributes.Builder()
-                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                        .setUsage(AudioAttributes.USAGE_GAME)
-                        .build()
+    fun init(context: Context) {
+        if (mediaPlayer == null) {
+            mediaPlayer = MediaPlayer().apply {
+                val audioAttributes = AudioAttributes.Builder()
+                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                    .setUsage(AudioAttributes.USAGE_GAME)
+                    .build()
 
-                        SoundPool.Builder()
-                            .setMaxStreams(10)
-                            .setAudioAttributes(audioAttributes)
-                            .build()
+                setAudioAttributes(audioAttributes)
+                setVolume(1.0f, 1.0f)
             }
         }
     }
 
-    suspend fun playSound(context: Context, @RawRes soundResId: Int) {
-        withContext(Dispatchers.IO) {
-            soundPool?.play(soundResId, 1.0f, 1.0f, 1, 0, 1.0f)
-        }
+    fun playSound(context: Context, soundResId: Int) {
+       CoroutineScope(Dispatchers.IO).launch{
+           mediaPlayer?.apply {
+               reset()
+               val fileDescriptor = context.resources.openRawResourceFd(soundResId)
+               setDataSource(fileDescriptor.fileDescriptor, fileDescriptor.startOffset, fileDescriptor.length)
+               fileDescriptor.close()
+
+               prepare()
+               start()
+           }
+       }
     }
 
     fun release() {
-        soundPool?.release()
-        soundPool = null
+        mediaPlayer?.release()
+        mediaPlayer = null
     }
 }
+
+

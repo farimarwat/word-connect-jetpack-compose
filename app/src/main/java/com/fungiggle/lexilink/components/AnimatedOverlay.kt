@@ -23,9 +23,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.fungiggle.lexilink.R
+import com.fungiggle.lexilink.utils.SoundPlayer
+
 @Composable
 @Preview(
     name = "Large", widthDp = 360, heightDp = 740

@@ -2,6 +2,7 @@ package com.fungiggle.lexilink.ui.screens
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -24,18 +25,32 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import com.farimarwat.picloo.utils.GemShopManager
 import com.fungiggle.lexilink.R
 import com.fungiggle.lexilink.ui.theme.LexiLinkTheme
 import com.fungiggle.lexilink.ui.theme.LexiLink_Background
 import com.fungiggle.lexilink.ui.theme.LexiLink_YellowDark
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @SuppressLint("CustomSplashScreen")
 class SplashActivity : ComponentActivity() {
+    lateinit var mContext:Context
     override fun onCreate(savedInstanceState: Bundle?) {
-
         super.onCreate(savedInstanceState)
+        mContext = this
+        CoroutineScope(Dispatchers.IO).launch{
 
+            //Check if app is installed first time. if
+            //First time then initial free gems are provided
+            GemShopManager.initializeSharedPrefs(mContext)
+            if(GemShopManager.isFirstInstallation()){
+                GemShopManager.initializeGemsTotal()
+                GemShopManager.setFirstInstallationStatus(false)
+            }
+        }
         setContent {
             LexiLinkTheme {
                 // A surface container using the 'background' color from the theme

@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -46,6 +47,8 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberImagePainter
 import com.fungiggle.lexilink.R
+import com.fungiggle.lexilink.components.ButtonRound
+import com.fungiggle.lexilink.components.LeafMain
 import com.fungiggle.lexilink.navigation.DestinationGame
 import kotlinx.coroutines.delay
 
@@ -204,47 +207,15 @@ fun BottomBar(){
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.Bottom
     ){
-        Image(
-            modifier = Modifier
-                .size(160.dp),
-            painter = painterResource(id = R.drawable.main_bottom_leaf),
-            contentDescription = "Bottom Leaf")
-        ButtonSettings()
-
-    }
-}
-@OptIn(ExperimentalComposeUiApi::class)
-@Composable
-fun ButtonSettings(){
-    var image by remember {
-        mutableStateOf(R.drawable.main_settings_default)
-    }
-    Box(
-        modifier = Modifier
+        LeafMain()
+        val modifier = Modifier
             .padding(32.dp)
             .size(60.dp)
-            .pointerInteropFilter {
-                when (it.action) {
-                    MotionEvent.ACTION_DOWN -> {
-                        image = R.drawable.main_settings_clicked
-                    }
+        ButtonRound(
+            modifier = modifier,
+            default = R.drawable.main_settings_default,
+            variant = R.drawable.main_settings_default){
+        }
 
-                    MotionEvent.ACTION_UP -> {
-                        image = R.drawable.main_settings_default
-                    }
-                }
-                true
-            }
-    ){
-        Image(
-            modifier = Modifier
-                .fillMaxSize(),
-            painter = painterResource(id = image),
-            contentDescription = "Bottom Leaf")
     }
-}
-
-private fun getRandomTranslationY(): Float {
-    // Adjust the range of random translation as needed
-    return (-20..20).random().toFloat()
 }

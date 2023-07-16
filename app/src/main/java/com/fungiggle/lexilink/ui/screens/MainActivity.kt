@@ -1,5 +1,6 @@
 package com.fungiggle.lexilink.ui.screens
 
+import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -24,6 +25,7 @@ import com.fungiggle.lexilink.navigation.DestinationMain
 import com.fungiggle.lexilink.ui.screens.gameview.GameScreen
 import com.fungiggle.lexilink.ui.screens.main.MainScreen
 import com.fungiggle.lexilink.ui.theme.LexiLinkTheme
+import com.fungiggle.lexilink.utils.SoundPlayer
 import com.fungiggle.lexilink.utils.TAG
 
 import dagger.hilt.android.AndroidEntryPoint
@@ -34,14 +36,13 @@ import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity(){
+    lateinit var mContext:Context
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            window.setDecorFitsSystemWindows(false)
-        } else {
-            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_FULLSCREEN
-        }*/
-
+        mContext = this
+        CoroutineScope(Dispatchers.Main).launch{
+            SoundPlayer.init(mContext)
+        }
         setContent {
             LexiLinkTheme {
 
@@ -98,12 +99,8 @@ class MainActivity : ComponentActivity(){
         if(hasFocus) hideSystemUI()
     }
 
-    /*  override fun onResume() {
-          super.onResume()
-          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-              window.setDecorFitsSystemWindows(false)
-          } else {
-              window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_FULLSCREEN
-          }
-      }*/
+    override fun onDestroy() {
+        super.onDestroy()
+        SoundPlayer.release()
+    }
 }

@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import com.fungiggle.lexilink.R
 
 @Composable
-fun TopBar(level:String){
+fun TopBar(level:String, gems:Int){
     Row(
         modifier = Modifier
             .fillMaxSize(),
@@ -32,12 +32,11 @@ fun TopBar(level:String){
         ButtonLevel(level)
 
         //Right
-        ButtonGem()
+        ButtonGem(gems)
     }
 }
 @Composable
-@Preview
-fun ButtonGem(){
+fun ButtonGem(gems:Int){
     Box(
         modifier = Modifier
             .padding(8.dp)
@@ -61,8 +60,8 @@ fun ButtonGem(){
                 painter = painterResource(id = R.drawable.gem),
                 contentDescription = "Gem")
             Text(
-                text = "20",
-
+                text = "$gems",
+                style = MaterialTheme.typography.labelMedium
                 )
         }
     }
