@@ -5,8 +5,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.toMutableStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.farimarwat.picloo.utils.GEMS_TO_CONSUME
-import com.farimarwat.picloo.utils.GemShopManager
+import com.fungiggle.lexilink.utils.GEMS_TO_CONSUME
+import com.fungiggle.lexilink.utils.GemShopManager
 import com.fungiggle.lexilink.data.answer.AnswerRepo
 import com.fungiggle.lexilink.data.word.WordRepo
 import com.fungiggle.lexilink.data.word.WordWithAnswers

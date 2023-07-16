@@ -1,8 +1,7 @@
-package com.farimarwat.picloo.utils
+package com.fungiggle.lexilink.utils
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.util.Log
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
 

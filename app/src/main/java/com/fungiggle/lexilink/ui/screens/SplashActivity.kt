@@ -25,7 +25,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import com.farimarwat.picloo.utils.GemShopManager
+import com.fungiggle.lexilink.utils.GemShopManager
 import com.fungiggle.lexilink.R
 import com.fungiggle.lexilink.ui.theme.LexiLinkTheme
 import com.fungiggle.lexilink.ui.theme.LexiLink_Background
