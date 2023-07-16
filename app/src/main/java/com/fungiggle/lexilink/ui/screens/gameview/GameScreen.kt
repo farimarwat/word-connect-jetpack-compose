@@ -304,7 +304,6 @@ fun GameScreen() {
 
             //Ad
             val adbuttonmodifier = Modifier
-                .padding(top=60.dp)
                 .size(80.dp)
                 .align(Alignment.CenterEnd)
             ButtonWatchAd(
