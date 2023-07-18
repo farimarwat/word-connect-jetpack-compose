@@ -24,19 +24,22 @@ object SoundPlayer {
         }
     }
 
-    fun playSound(context: Context, soundResId: Int) {
-       CoroutineScope(Dispatchers.IO).launch{
-           mediaPlayer?.apply {
-               reset()
-               val fileDescriptor = context.resources.openRawResourceFd(soundResId)
-               setDataSource(fileDescriptor.fileDescriptor, fileDescriptor.startOffset, fileDescriptor.length)
-               fileDescriptor.close()
-               prepare()
-               start()
-           }
-       }
-    }
+    private val soundPlayerLock = Any()
 
+    fun playSound(context: Context, soundResId: Int) {
+        CoroutineScope(Dispatchers.IO).launch {
+            synchronized(soundPlayerLock) {
+                mediaPlayer?.apply {
+                    reset()
+                    val fileDescriptor = context.resources.openRawResourceFd(soundResId)
+                    setDataSource(fileDescriptor.fileDescriptor, fileDescriptor.startOffset, fileDescriptor.length)
+                    fileDescriptor.close()
+                    prepare()
+                    start()
+                }
+            }
+        }
+    }
     fun release() {
         mediaPlayer?.release()
         mediaPlayer = null

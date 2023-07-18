@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -92,6 +93,9 @@ fun GameScreen() {
         mutableStateOf(Offset.Zero)
     }
     var showPopupLetter by remember {
+        mutableStateOf(false)
+    }
+    var showHand by remember {
         mutableStateOf(false)
     }
     LaunchedEffect(Unit){
@@ -211,11 +215,12 @@ fun GameScreen() {
 
                                        //check if already solved
                                        val differedIsSolved = scope.async {
-                                           val solved = viewModel.isSolved(listLocal)
-                                           solved
+                                           val index = viewModel.isSolved(listLocal)
+                                           index
                                        }
-                                       val solved = differedIsSolved.await()
-                                       if(solved != null){
+                                       val index = differedIsSolved.await()
+                                       if(index != -1){
+                                           viewModel.mListSolutions[index] = viewModel.mListSolutions[index].copy(animate = true)
                                            SoundPlayer.playSound(context,R.raw.not_allowed)
                                            viewModel.wordtopreview.value = ""
                                            return@launch
@@ -268,6 +273,7 @@ fun GameScreen() {
                                 scope.launch(Dispatchers.IO) {
                                     val gemsConsumed = viewModel.consumeGems()
                                     if(!gemsConsumed){
+                                        showHand = true
                                         SoundPlayer.playSound(context,R.raw.not_allowed)
                                         return@launch;
                                     }
@@ -336,13 +342,19 @@ fun GameScreen() {
 
             //Ad
             val adbuttonmodifier = Modifier
-                .size(80.dp)
                 .align(Alignment.CenterEnd)
             ButtonWatchAd(
-                modifier = adbuttonmodifier
+                modifier = adbuttonmodifier,
+                showHand = showHand
             ){
 
                 //Show your add here
+            }
+        }
+        LaunchedEffect(showHand){
+            if(showHand){
+                delay(3000)
+                showHand = false
             }
         }
 

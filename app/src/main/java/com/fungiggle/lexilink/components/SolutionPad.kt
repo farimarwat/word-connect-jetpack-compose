@@ -80,9 +80,9 @@ fun SolutionPad(solutions:List<GameSolution>){
         total += it.size
     }
 
-    itemSize = if(total < 4){
+    itemSize = if(total < 4 && section3 == null){
         large
-    } else if( total < 5) {
+    } else if( total < 5 || section3 != null) {
         medium
     } else {
         small
