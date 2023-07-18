@@ -1,15 +1,17 @@
 # Word Puzzle/Connect Game
 A word puzzle game based on android jetpack compose.
 
+## Video Demo (Click on image):
+
 <a href="https://youtube.com/shorts/4mfJrG7XfLs?feature=share">
-            <img src="https://github.com/farimarwat/word-connect-jetpack-compose/blob/master/preview.png" width="50%" height="50%"/>
+            <img src="https://github.com/farimarwat/word-connect-jetpack-compose/blob/master/preview.png" width="30%" height="30%"/>
 </a>
 
 ## Note:
-This project is open-source and any one is most welcome to contribute but remember that
+This project is open-source and every one is most welcome to contribute but remember that
 before uploading to play store, modify all resources e.g., images, audios etc. All the resources
-that below the project/author are strictly prohibited to use in your commercial release. In case
-of violation, your app will be reported and suspended from play store/app store.
+that belongs to the project/author including brand "LexiLink" are strictly prohibited to use in your commercial release due to copy right act. In case
+of violation, your app will be reported and suspended from play store/app store when your app/game will be on peak.
 
 ## Documentation
 Used Technologies:
@@ -21,6 +23,7 @@ Used Technologies:
 6. MVVM
 7. Navigation Component
 8. Single Activity and Multiple Screens
+9. Only 200 levels available
 
 ## How To Use
 1. Just Clone the repo and done!.
@@ -31,7 +34,7 @@ actual game. It is quite simple and easy to understand.
 
 Every thing resides in ui>screens>gameview package. This package containes two files, one is viewmodel and second is gamveview composable.
 
-<a href="https://github.com/farimarwat/word-connect-jetpack-compose/blob/master/app/src/main/java/com/fungiggle/lexilink/ui/screens/gameview/GameScreen.kt">GameView</a> is divided into two parts, one is top and second is bottom. The top section contains the solution pad which letters will be showed invisible/visible. Second and the bottom part contains keypad which can be used to select letters.
+<a href="https://github.com/farimarwat/word-connect-jetpack-compose/blob/master/app/src/main/java/com/fungiggle/lexilink/ui/screens/gameview/GameScreen.kt">GameView</a> is divided into two parts, one is top and second is bottom. The top section contains the solution pad where letters will be showed invisible/visible. Second and the bottom part contains keypad which can be used to select letters.
 
 ## Getting Started
 
