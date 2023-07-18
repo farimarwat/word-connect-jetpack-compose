@@ -1,5 +1,6 @@
 package com.fungiggle.lexilink.ui.screens.gameview
 
+import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.toMutableStateList
@@ -12,7 +13,9 @@ import com.fungiggle.lexilink.data.word.WordRepo
 import com.fungiggle.lexilink.data.word.WordWithAnswers
 import com.fungiggle.lexilink.models.GameLetter
 import com.fungiggle.lexilink.models.GameSolution
+import com.fungiggle.lexilink.models.GameSolutionWithLetter
 import com.fungiggle.lexilink.models.KeyPadButton
+import com.fungiggle.lexilink.utils.TAG
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -27,6 +30,7 @@ class GameScreenViewModel @Inject constructor(
 ) : ViewModel() {
     var mListletters = mutableStateListOf<KeyPadButton>()
     var mListSolutions = mutableStateListOf<GameSolution>()
+    val mListSolutionsSelected = mutableStateListOf<GameSolution>()
     var mWordWithAnswers:WordWithAnswers? = null
     var level = mutableStateOf("")
     var dataPrepared = mutableStateOf(false)
@@ -43,6 +47,7 @@ class GameScreenViewModel @Inject constructor(
             dataPrepared.value = false
             mListletters.clear()
             mListSolutions.clear()
+            mListSolutionsSelected.clear()
             //getting data from database
             val job = viewModelScope.launch{
                 mWordWithAnswers = wordRepo.getWordWithAnswers(false)
@@ -93,12 +98,13 @@ class GameScreenViewModel @Inject constructor(
 
     //This will set the letter to visible
     //And return the letter's solution
-     fun showLetter():GameSolution?{
+     fun showLetter():GameSolutionWithLetter?{
+        Log.e(TAG,"Start Show Letter")
         mListSolutions.forEachIndexed{ sindex, sitem ->
             sitem.letters.forEachIndexed{lindex,litem ->
                 if(!litem.isvisible){
                     mListSolutions[sindex].letters[lindex] = litem.copy(isvisible = true)
-                    return sitem
+                    return GameSolutionWithLetter(sitem,litem)
                 }
             }
         }
@@ -122,6 +128,7 @@ class GameScreenViewModel @Inject constructor(
             letters[i] = l.copy(isvisible = true)
         }
         mListSolutions[index] = solution.copy(letters = letters.toMutableStateList(), iscompleted = true)
+        mListSolutionsSelected.add(mListSolutions[index])
         return isLevelCompleted()
     }
 
@@ -131,6 +138,18 @@ class GameScreenViewModel @Inject constructor(
             word += kpb.label.uppercase()
         }
         mListSolutions.forEach { solution ->
+            if(solution.isEqual(word)){
+                return solution
+            }
+        }
+        return null
+    }
+    fun isSolved(list:List<KeyPadButton>):GameSolution?{
+        var word = ""
+        list.forEach {kpb ->
+            word += kpb.label.uppercase()
+        }
+        mListSolutionsSelected.forEach { solution ->
             if(solution.isEqual(word)){
                 return solution
             }
@@ -153,12 +172,12 @@ class GameScreenViewModel @Inject constructor(
     }
 
     //Gem
-    suspend fun consumeGems():Boolean = withContext(Dispatchers.IO){
+    fun consumeGems():Boolean {
         val gemsTotal = GemShopManager.getGemsTotal()
         if(gemsTotal >= GEMS_TO_CONSUME){
             GemShopManager.consumeGems(GEMS_TO_CONSUME)
-            return@withContext true
+            return true
         }
-        return@withContext false
+        return false
     }
 }

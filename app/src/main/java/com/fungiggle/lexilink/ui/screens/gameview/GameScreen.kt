@@ -1,10 +1,14 @@
 package com.fungiggle.lexilink.ui.screens.gameview
 
+import android.util.Log
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -16,10 +20,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.fungiggle.lexilink.utils.GEMS_TO_CONSUME
@@ -32,10 +38,13 @@ import com.fungiggle.lexilink.components.DialogLevelComplete
 import com.fungiggle.lexilink.components.GoodJob
 import com.fungiggle.lexilink.components.KeyPad
 import com.fungiggle.lexilink.components.PreviewWord
+import com.fungiggle.lexilink.components.ShowLetterPopup
 import com.fungiggle.lexilink.components.SolutionPad
 import com.fungiggle.lexilink.components.TopBar
 import com.fungiggle.lexilink.utils.SoundPlayer
+import com.fungiggle.lexilink.utils.TAG
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -75,6 +84,15 @@ fun GameScreen() {
     }
     var mGems by remember{
         mutableIntStateOf(0)
+    }
+    var offsetShowLetterTarget by remember {
+        mutableStateOf(Offset.Zero)
+    }
+    var offsetHint by remember{
+        mutableStateOf(Offset.Zero)
+    }
+    var showPopupLetter by remember {
+        mutableStateOf(false)
     }
     LaunchedEffect(Unit){
         mGems = GemShopManager.getGemsTotal()
@@ -180,23 +198,51 @@ fun GameScreen() {
                                     shuffle = false
                                 },
                                 onSelected = { list ->
+                                    val listLocal = list.toList()
                                     var word = ""
-                                    list.forEach { btn ->
+                                    listLocal.forEach { btn ->
                                         word += btn.label
                                     }
                                     viewModel.updateWordToPreview(word)
                                 },
                                 onCompleted = { list ->
-                                    val solution = viewModel.isExists(list)
-                                    if (solution != null) {
-                                        val alllevelscompleted = viewModel.setSolutionComplete(solution)
-                                        if(alllevelscompleted){ // level is completed
-                                            levelCompleted = true
-                                        } else { //only solution is completed
-                                            solutionCompleted = true
-                                        }
-                                    }
-                                    viewModel.wordtopreview.value = ""
+                                    val listLocal = list.toList()
+                                   scope.launch {
+
+                                       //check if already solved
+                                       val differedIsSolved = scope.async {
+                                           val solved = viewModel.isSolved(listLocal)
+                                           solved
+                                       }
+                                       val solved = differedIsSolved.await()
+                                       if(solved != null){
+                                           SoundPlayer.playSound(context,R.raw.not_allowed)
+                                           viewModel.wordtopreview.value = ""
+                                           return@launch
+                                       }//
+
+                                       //if not already solved then check if solution exists for the
+                                       //selected word
+                                       val differedIsExists = scope.async {
+                                           val solution = viewModel.isExists(listLocal)
+                                           solution
+                                       }
+                                       val solution = differedIsExists.await()
+                                       if(solution == null){
+                                           SoundPlayer.playSound(context,R.raw.not_allowed)
+                                           viewModel.wordtopreview.value = ""
+                                           return@launch
+                                       }
+
+                                       //If solution exists then set it as complete
+                                       val alllevelscompleted = viewModel.setSolutionComplete(solution)
+                                       if(alllevelscompleted){ // level is completed
+                                           levelCompleted = true
+                                       } else { //only solution is completed
+                                           solutionCompleted = true
+                                       }
+                                       viewModel.wordtopreview.value = ""
+                                   }
                                 }
                             )
                         }
@@ -209,7 +255,6 @@ fun GameScreen() {
                             .fillMaxSize()
                             .weight(0.2f)
                     ) {
-
                         Image(
                             modifier = Modifier
                                 .fillMaxSize(),
@@ -218,24 +263,38 @@ fun GameScreen() {
                             contentScale = ContentScale.FillBounds
                         )
                         BottomBar(
-                            onHintClicked = {
+                            onHintClicked = { offset ->
+                                offsetHint = offset
                                 scope.launch(Dispatchers.IO) {
                                     val gemsConsumed = viewModel.consumeGems()
-                                    if(gemsConsumed){
+                                    if(!gemsConsumed){
+                                        SoundPlayer.playSound(context,R.raw.not_allowed)
+                                        return@launch;
+                                    }
+                                    SoundPlayer.playSound(context,R.raw.show_letter)
+                                    val deffered = scope.async {
                                         val solution = viewModel.showLetter()
-                                        if(solution != null){
-                                            val allLettersShowed = viewModel.isAllLettersShowed(solution)
-                                            if(allLettersShowed){
-                                                val alllevelscompleted = viewModel.setSolutionComplete(solution)
-                                                if(alllevelscompleted){ // level is completed
-                                                    levelCompleted = true
-                                                } else { //only solution is completed
-                                                    solutionCompleted = true
-                                                }
+                                        solution
+                                    }
+                                    val dsolution = deffered.await()
+                                    if(dsolution != null){
+                                        val solution = dsolution.solution
+                                        val letter = dsolution.letter
+                                        //showing start popup over the letter
+                                        showPopupLetter = true
+                                        offsetShowLetterTarget = letter.offset
+
+                                        val allLettersShowed = viewModel.isAllLettersShowed(solution)
+                                        if(allLettersShowed){
+                                            val alllevelscompleted = viewModel.setSolutionComplete(solution)
+                                            if(alllevelscompleted){ // level is completed
+                                                levelCompleted = true
+                                            } else { //only solution is completed
+                                                solutionCompleted = true
                                             }
                                         }
-                                        mGems = GemShopManager.getGemsTotal()
                                     }
+                                    mGems = GemShopManager.getGemsTotal()
                                 }
                             },
                             onShuffleClicked = {
@@ -285,6 +344,21 @@ fun GameScreen() {
 
                 //Show your add here
             }
+        }
+
+        //letter start
+        if(showPopupLetter){
+            LaunchedEffect(Unit){
+                scope.launch {
+                    delay(1000)
+                    showPopupLetter = false
+                }
+            }
+
+            ShowLetterPopup(
+                hintOffset = offsetHint,
+                letterOffset = offsetShowLetterTarget
+            )
         }
 
         AnimatedOverlay(animate = !viewModel.dataPrepared.value)

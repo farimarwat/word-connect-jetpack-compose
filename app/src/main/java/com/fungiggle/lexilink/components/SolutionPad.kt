@@ -45,7 +45,7 @@ fun SolutionPad(solutions:List<GameSolution>){
     } else {
         small = 32.dp
         medium = 40.dp
-        large = 50.dp
+        large = 60.dp
     }
     var itemSize = 0.dp
     var total = 0
@@ -80,9 +80,9 @@ fun SolutionPad(solutions:List<GameSolution>){
         total += it.size
     }
 
-    itemSize = if(total <5){
+    itemSize = if(total < 4){
         large
-    } else if( total < 7) {
+    } else if( total < 5) {
         medium
     } else {
         small
@@ -105,8 +105,11 @@ fun SolutionPad(solutions:List<GameSolution>){
                         horizontalAlignment = Alignment.CenterHorizontally
                     ){
                         items(sec){ sol ->
-                            GameSolutionItem(solution = sol,
-                                itemsize =itemSize)
+                            GameSolutionItem(
+                                solution = sol,
+                                itemsize =itemSize,
+                                solutions = solutions
+                            )
                         }
                     }
                 }
@@ -117,7 +120,8 @@ fun SolutionPad(solutions:List<GameSolution>){
                     ){
                         items(sec){sol ->
                             GameSolutionItem(solution = sol,
-                                itemsize =itemSize
+                                itemsize =itemSize,
+                                solutions = solutions
                             )
                         }
                     }
@@ -131,6 +135,7 @@ fun SolutionPad(solutions:List<GameSolution>){
                     items(sec){sol ->
                         GameSolutionItem(solution = sol,
                             itemsize =itemSize,
+                            solutions = solutions
                         )
                     }
                 }

@@ -22,6 +22,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -38,13 +39,18 @@ import java.util.UUID
 @Composable
 fun GameLetterItem(
     modifier: Modifier = Modifier,
-    letter: GameLetter
+    letter: GameLetter,
+    onOffsetObtained: (offset: Offset) -> Unit = {}
 ) {
-    Log.e(TAG,"Letter: $letter")
     Box(
         modifier = Modifier
             .then(modifier)
-            ,
+            .onGloballyPositioned {
+                        onOffsetObtained(Offset(
+                            it.positionInRoot().x,
+                            it.positionInRoot().y
+                        ))
+            },
         contentAlignment = Alignment.Center
     ) {
         Image(
@@ -61,8 +67,7 @@ fun GameLetterItem(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .scale(scaleSolution)
-            ,
+                .scale(scaleSolution),
             contentAlignment = Alignment.Center
         ) {
             Image(

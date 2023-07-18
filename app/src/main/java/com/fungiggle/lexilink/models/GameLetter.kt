@@ -6,5 +6,6 @@ import java.util.UUID
 data class GameLetter(
     val id:String = UUID.randomUUID().toString(),
     val label:String,
-    val isvisible:Boolean = false
+    val isvisible:Boolean = false,
+    val offset:Offset = Offset.Zero
 )

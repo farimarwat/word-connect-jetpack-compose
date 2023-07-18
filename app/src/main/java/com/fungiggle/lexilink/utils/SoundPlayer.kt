@@ -31,7 +31,6 @@ object SoundPlayer {
                val fileDescriptor = context.resources.openRawResourceFd(soundResId)
                setDataSource(fileDescriptor.fileDescriptor, fileDescriptor.startOffset, fileDescriptor.length)
                fileDescriptor.close()
-
                prepare()
                start()
            }

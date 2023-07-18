@@ -203,12 +203,14 @@ fun KeyPad(
 
                 }
                 STATE_UP ->{
-                    onCompleted(listSelected)
-                    shouldSelect = false
-                    listSelected.clear()
-                    path.reset()
-                    pathTmp.reset()
-                    buttonType = BUTTON_DEFAULT
+                    if(listSelected.isNotEmpty()){
+                        onCompleted(listSelected)
+                        shouldSelect = false
+                        listSelected.clear()
+                        path.reset()
+                        pathTmp.reset()
+                        buttonType = BUTTON_DEFAULT
+                    }
                 }
             }
             // Draw buttons
