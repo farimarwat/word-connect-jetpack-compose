@@ -95,7 +95,14 @@ val adbuttonmodifier = Modifier
             }
 ```
 **Note:** I will gradually update the documentation.
+## Versio Log
+**18/07/2023**
 
+1. ad indicator added
+2. hint indicator added
+3. error sound added
+
+Initial release
 ## Support Me
 If you want to donate then you are welcome to buy me a cup of tea via **PATREON** because this encourages me to give you more free stuff
 and continue to  maintain this library
