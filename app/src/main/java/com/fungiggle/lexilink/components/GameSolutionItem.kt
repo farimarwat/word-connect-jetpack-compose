@@ -41,7 +41,7 @@ fun GameSolutionItem(
 ) {
     val rotate by animateFloatAsState(
         targetValue = if (solution.iscompleted && solution.animate) 360f else 0f,
-        animationSpec = tween(500)
+        animationSpec = tween(300)
     )
     Box(
         modifier = Modifier

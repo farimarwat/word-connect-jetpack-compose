@@ -7,7 +7,7 @@ import androidx.security.crypto.MasterKeys
 
 const val GEMSHOP_FILENAME = "gem_shop"
 const val INITIAL_GEMS = 100
-const val GEMS_TO_CONSUME = 1
+const val GEMS_TO_CONSUME = 30
 object GemShopManager {
     private const val KEY_GEMS_TOTAL = "gems_total"
     private const val KEY_FIRST_INSTALLATION = "first_installation"

@@ -83,7 +83,7 @@ class GameScreenViewModel @Inject constructor(
                         )
                     }
                     list.add(
-                        GameSolution(gameletters.toMutableStateList())
+                        GameSolution(letters=gameletters.toMutableStateList())
                     )
                 }
 
@@ -144,17 +144,18 @@ class GameScreenViewModel @Inject constructor(
         }
         return null
     }
-    fun isSolved(list:List<KeyPadButton>):Int{
+    fun isSolved(list:List<KeyPadButton>):GameSolution?{
         var word = ""
         list.forEach {kpb ->
             word += kpb.label.uppercase()
         }
-        mListSolutionsSelected.forEachIndexed() { index ,solution ->
+        mListSolutionsSelected.forEach{solution ->
             if(solution.isEqual(word)){
-                return index
+
+                return solution
             }
         }
-        return -1
+        return null
     }
 
     fun isLevelCompleted():Boolean{

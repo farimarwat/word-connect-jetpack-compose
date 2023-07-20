@@ -215,14 +215,20 @@ fun GameScreen() {
 
                                        //check if already solved
                                        val differedIsSolved = scope.async {
-                                           val index = viewModel.isSolved(listLocal)
-                                           index
+                                           val solution = viewModel.isSolved(listLocal)
+                                           solution
                                        }
-                                       val index = differedIsSolved.await()
-                                       if(index != -1){
-                                           viewModel.mListSolutions[index] = viewModel.mListSolutions[index].copy(animate = true)
-                                           SoundPlayer.playSound(context,R.raw.not_allowed)
-                                           viewModel.wordtopreview.value = ""
+                                       val solved = differedIsSolved.await()
+                                       if(solved != null){
+                                           val index = viewModel.mListSolutions.indexOfFirst {
+                                               it.id == solved.id
+                                           }
+                                           if(index != -1){
+                                               val animate = viewModel.mListSolutions[index].animate
+                                               viewModel.mListSolutions[index] = viewModel.mListSolutions[index].copy(animate = !animate)
+                                               SoundPlayer.playSound(context,R.raw.not_allowed)
+                                               viewModel.wordtopreview.value = ""
+                                           }
                                            return@launch
                                        }//
 
