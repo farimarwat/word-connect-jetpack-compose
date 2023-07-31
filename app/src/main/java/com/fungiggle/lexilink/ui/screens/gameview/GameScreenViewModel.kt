@@ -1,6 +1,7 @@
 package com.fungiggle.lexilink.ui.screens.gameview
 
 import android.util.Log
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.toMutableStateList
@@ -33,7 +34,8 @@ class GameScreenViewModel @Inject constructor(
     var mListSolutions = mutableStateListOf<GameSolution>()
     val mListSolutionsSelected = mutableStateListOf<GameSolution>()
     var mLevelWithSolutions:LevelWithSolutions? = null
-    var level = mutableStateOf("")
+    var mLevel = mutableStateOf("")
+    var mCompletedLevels = mutableIntStateOf(0)
     var dataPrepared = mutableStateOf(false)
     var mGameCompleted = mutableStateOf(false)
 
@@ -51,6 +53,8 @@ class GameScreenViewModel @Inject constructor(
             mListletters.clear()
             mListSolutions.clear()
             mListSolutionsSelected.clear()
+            //Get Completed levels
+            mCompletedLevels.value = levelRepo.getCompletedLevelCount()+1
             //getting data from database
             val job = viewModelScope.launch{
                 //startagain
@@ -75,7 +79,7 @@ class GameScreenViewModel @Inject constructor(
             job.join()
             mLevelWithSolutions?.let { levelWithSolutions ->
                 val dblevel = levelWithSolutions.level
-                level.value = dblevel.id.toString()
+                mLevel.value = mCompletedLevels.value.toString()
                 val answers = levelWithSolutions.solutions
                 val solutions = mutableListOf<String>()
                 answers.forEach{item ->

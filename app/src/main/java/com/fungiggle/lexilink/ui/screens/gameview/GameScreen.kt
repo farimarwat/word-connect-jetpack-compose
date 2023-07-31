@@ -65,7 +65,7 @@ fun GameScreen() {
     var shuffle by remember {
         mutableStateOf(false)
     }
-    val mLevel by viewModel.level
+    val mLevel by viewModel.mLevel
     val dataprepared by viewModel.dataPrepared
 
     var levelCompleted by remember {

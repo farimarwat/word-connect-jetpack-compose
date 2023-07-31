@@ -16,4 +16,7 @@ interface LevelDao {
 
     @Update
     suspend fun update(word:Level)
+
+    @Query("SELECT COUNT(*) FROM wordapp_level WHERE level_completed = 1")
+    suspend fun getCompletedLevelCount(): Int
 }
