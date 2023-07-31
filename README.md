@@ -13,6 +13,8 @@ before uploading to play store, modify all resources e.g., images, audios etc. A
 that belongs to the project/author including brand "LexiLink" are strictly prohibited to use in your commercial release due to copy right act. In case
 of violation, your app will be reported and suspended from play store/app store when your app/game will be on peak.
 
+## Note:
+Some major changes made. Data classes are seperated to increase readability. So completely update the project
 ## Documentation
 Used Technologies:
 1. Jetpack Compose
@@ -27,6 +29,12 @@ Used Technologies:
 
 ## How To Use
 1. Just Clone the repo and done!.
+
+## Data Structure <a href="https://github.com/farimarwat/word-connect-jetpack-compose/tree/master/app/src/main/java/com/fungiggle/lexilink/data">(Models)</a>
+1. Chapter: is a kind of group
+2. Level: Chapter has many levels
+3. Solution: Levels has many solutions
+
 
 ## Screens
 There are two screen composables (screens) <a href="https://github.com/farimarwat/word-connect-jetpack-compose/blob/master/app/src/main/java/com/fungiggle/lexilink/ui/screens/main/MainScreen.kt">Main Screen</a> which have play/settings buttons and gameview which have the
@@ -96,6 +104,10 @@ val adbuttonmodifier = Modifier
 ```
 **Note:** I will gradually update the documentation.
 ## Versio Log
+**31/07/2023**
+
+Major changes of seperating data models in Chapter. Chapter has levels. Level has solutions.
+
 **18/07/2023**
 
 1. ad indicator added
