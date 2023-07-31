@@ -6,11 +6,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.toMutableStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.fungiggle.lexilink.data.chapter.Chapter
+import com.fungiggle.lexilink.data.chapter.ChapterRepo
 import com.fungiggle.lexilink.utils.GEMS_TO_CONSUME
 import com.fungiggle.lexilink.utils.GemShopManager
-import com.fungiggle.lexilink.data.answer.AnswerRepo
-import com.fungiggle.lexilink.data.word.WordRepo
-import com.fungiggle.lexilink.data.word.WordWithAnswers
+import com.fungiggle.lexilink.data.level.LevelRepo
+import com.fungiggle.lexilink.data.level.LevelWithSolutions
 import com.fungiggle.lexilink.models.GameLetter
 import com.fungiggle.lexilink.models.GameSolution
 import com.fungiggle.lexilink.models.GameSolutionWithLetter
@@ -20,20 +21,21 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
 class GameScreenViewModel @Inject constructor(
-    val wordRepo: WordRepo,
-    val answerRepo: AnswerRepo
+    val levelRepo: LevelRepo,
+    val chapterRepo: ChapterRepo
 ) : ViewModel() {
+    var mChapter:Chapter? = null
     var mListletters = mutableStateListOf<KeyPadButton>()
     var mListSolutions = mutableStateListOf<GameSolution>()
     val mListSolutionsSelected = mutableStateListOf<GameSolution>()
-    var mWordWithAnswers:WordWithAnswers? = null
+    var mLevelWithSolutions:LevelWithSolutions? = null
     var level = mutableStateOf("")
     var dataPrepared = mutableStateOf(false)
+    var mGameCompleted = mutableStateOf(false)
 
     //wordtopreview
     val wordtopreview = mutableStateOf("")
@@ -45,24 +47,41 @@ class GameScreenViewModel @Inject constructor(
     fun prepareLevel() =
         viewModelScope.launch(Dispatchers.IO) {
             dataPrepared.value = false
+            mChapter = null
             mListletters.clear()
             mListSolutions.clear()
             mListSolutionsSelected.clear()
             //getting data from database
             val job = viewModelScope.launch{
-                mWordWithAnswers = wordRepo.getWordWithAnswers(false)
+                //startagain
+                mChapter = chapterRepo.getChapter(false)
+                if(mChapter == null){
+                    mGameCompleted.value = true
+                    return@launch
+                }
+                mChapter?.let { chapter ->
+                    val levelWithSolutions = levelRepo.getLevelWithSolutions(chapter.id,false)
+                    Log.e(TAG,"Level With Solutions: ${levelWithSolutions}")
+                    if(levelWithSolutions == null){
+                        Log.e(TAG,"Level Empty")
+                        chapterRepo.update(mChapter!!.copy(chapterCompleted = true))
+                        return@launch
+                    } else {
+                        mLevelWithSolutions = levelWithSolutions
+                    }
+                }
+
             }
             job.join()
-
-            mWordWithAnswers?.let { wordwithanswers ->
-                val dbword = wordwithanswers.word
-                level.value = dbword.serial.toString()
-                val answers = wordwithanswers.answers
+            mLevelWithSolutions?.let { levelWithSolutions ->
+                val dblevel = levelWithSolutions.level
+                level.value = dblevel.id.toString()
+                val answers = levelWithSolutions.solutions
                 val solutions = mutableListOf<String>()
                 answers.forEach{item ->
-                    solutions.add(item.answer)
+                    solutions.add(item.solutionWord)
                 }
-                val letters = dbword.word
+                val letters = dblevel.levelLetters
 
                 //Preparing Keypad Selection
                 val listletters = mutableListOf<KeyPadButton>()
@@ -89,10 +108,9 @@ class GameScreenViewModel @Inject constructor(
 
                 val sorted = list.sortedBy { it.letters.size }
                 mListSolutions = sorted.toMutableStateList()
+                delay(1000)
+                dataPrepared.value = true
             }
-
-            delay(1000)
-            dataPrepared.value = true
         }
 
 
@@ -132,7 +150,7 @@ class GameScreenViewModel @Inject constructor(
         return isLevelCompleted()
     }
 
-    fun isExists(list:List<KeyPadButton>):GameSolution?{
+    fun isSolutionExists(list:List<KeyPadButton>):GameSolution?{
         var word = ""
         list.forEach {kpb ->
             word += kpb.label.uppercase()
@@ -164,14 +182,20 @@ class GameScreenViewModel @Inject constructor(
                 return false
             }
         }
-        mWordWithAnswers?.let { word ->
+        mLevelWithSolutions?.let { level ->
             viewModelScope.launch(Dispatchers.IO) {
-                wordRepo.update(word.word.copy(completed = true))
+                levelRepo.update(level.level.copy(levelCompleted = true))
+                //checking if chapter is completed
+                mChapter?.let { chapter ->
+                    val levelWithSolutions = levelRepo.getLevelWithSolutions(chapter.id,false)
+                    if(levelWithSolutions == null){
+                        chapterRepo.update(chapter.copy(chapterCompleted = true))
+                    }
+                }
             }
         }
         return true
     }
-
     //Gem
     fun consumeGems():Boolean {
         val gemsTotal = GemShopManager.getGemsTotal()

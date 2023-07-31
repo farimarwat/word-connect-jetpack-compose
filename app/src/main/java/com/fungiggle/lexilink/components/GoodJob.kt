@@ -24,7 +24,7 @@ import com.fungiggle.lexilink.R
 fun GoodJob(modifier: Modifier){
     Box(
         modifier = Modifier
-            .size(300.dp)
+            .size(200.dp)
             .background(Color.Transparent)
             .then(modifier)
         ,

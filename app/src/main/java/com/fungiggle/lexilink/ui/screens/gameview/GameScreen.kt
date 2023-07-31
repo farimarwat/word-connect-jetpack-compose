@@ -1,16 +1,10 @@
 package com.fungiggle.lexilink.ui.screens.gameview
 
-import android.util.Log
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -26,8 +20,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.fungiggle.lexilink.utils.GEMS_TO_CONSUME
 import com.fungiggle.lexilink.utils.GemShopManager
@@ -43,7 +35,6 @@ import com.fungiggle.lexilink.components.ShowLetterPopup
 import com.fungiggle.lexilink.components.SolutionPad
 import com.fungiggle.lexilink.components.TopBar
 import com.fungiggle.lexilink.utils.SoundPlayer
-import com.fungiggle.lexilink.utils.TAG
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
@@ -235,7 +226,7 @@ fun GameScreen() {
                                        //if not already solved then check if solution exists for the
                                        //selected word
                                        val differedIsExists = scope.async {
-                                           val solution = viewModel.isExists(listLocal)
+                                           val solution = viewModel.isSolutionExists(listLocal)
                                            solution
                                        }
                                        val solution = differedIsExists.await()
@@ -403,7 +394,7 @@ fun GameScreen() {
             LaunchedEffect(Unit){
                 scope.launch(Dispatchers.IO) {
                     SoundPlayer.playSound(context,R.raw.good_job)
-                    delay(2000)
+                    delay(1000)
                     solutionCompleted = false
                 }
             }
