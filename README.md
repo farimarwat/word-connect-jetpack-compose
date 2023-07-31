@@ -102,6 +102,11 @@ val adbuttonmodifier = Modifier
                 //Show your add here
             }
 ```
+## To add more levels
+To add more levels, go to the dJango python project. Download the repo, run server and add more levels.
+Next generate the database which is compatable with kotlin room database on Chapters page. Next copy that database (wordgame.db) to asset folder.
+Python project: https://github.com/farimarwat/word-connect-database-populator/
+
 **Note:** I will gradually update the documentation.
 ## Versio Log
 **31/07/2023**
