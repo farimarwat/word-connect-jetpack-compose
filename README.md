@@ -7,7 +7,7 @@ A word puzzle game based on android jetpack compose.
             <img src="https://github.com/farimarwat/word-connect-jetpack-compose/blob/master/preview.png" width="30%" height="30%"/>
 </a>
 
-## Note:
+## Important:
 This project is open-source and every one is most welcome to contribute but remember that
 before uploading to play store, modify all resources e.g., images, audios etc. All the resources
 that belongs to the project/author including brand "LexiLink" are strictly prohibited to use in your commercial release due to copy right act. In case
